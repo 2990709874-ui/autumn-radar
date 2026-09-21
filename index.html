@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>纪辉的 2027 秋招雷达</title>
+  <meta name="description" content="AI PM 秋招公司/岗位优先级、投递入口与面试状态看板" />
+  <style>
+    :root {
+      --bg: #070a13;
+      --panel: rgba(255,255,255,.075);
+      --panel-2: rgba(255,255,255,.115);
+      --text: #f4f7fb;
+      --muted: #99a4b8;
+      --line: rgba(255,255,255,.13);
+      --brand: #8b5cf6;
+      --brand-2: #22d3ee;
+      --good: #2dd4bf;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --blue: #60a5fa;
+      --shadow: 0 24px 90px rgba(0,0,0,.38);
+      --radius: 24px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% -10%, rgba(34,211,238,.32), transparent 34%),
+        radial-gradient(circle at 84% 2%, rgba(139,92,246,.45), transparent 38%),
+        radial-gradient(circle at 76% 86%, rgba(45,212,191,.22), transparent 32%),
+        linear-gradient(135deg, #060812 0%, #0b1020 47%, #111827 100%);
+      overflow-x: hidden;
+    }
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 72%);
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    .wrap { width: min(1440px, calc(100vw - 36px)); margin: 0 auto; }
+    .hero { padding: 34px 0 18px; position: relative; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+    .logo { display: flex; gap: 12px; align-items: center; font-weight: 850; letter-spacing: -.02em; }
+    .logo-mark { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); display: grid; place-items: center; box-shadow: 0 16px 40px rgba(34,211,238,.24); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.06); color: var(--muted); font-size: 13px; backdrop-filter: blur(14px); }
+    .hero-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; align-items: stretch; }
+    .hero-card, .panel { border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.105), rgba(255,255,255,.055)); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .hero-card { padding: 34px; position: relative; overflow: hidden; }
+    .hero-card:after { content: ""; position: absolute; width: 330px; height: 330px; right: -140px; top: -140px; border-radius: 50%; background: radial-gradient(circle, rgba(34,211,238,.38), transparent 68%); }
+    h1 { margin: 0; font-size: clamp(34px, 5vw, 66px); line-height: .98; letter-spacing: -.06em; max-width: 780px; }
+    .lead { color: #cbd5e1; font-size: 17px; line-height: 1.8; max-width: 830px; margin: 22px 0 0; }
+    .em { color: white; font-weight: 780; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+    .btn { border: 0; cursor: pointer; border-radius: 16px; padding: 12px 16px; color: white; font-weight: 760; display: inline-flex; align-items: center; gap: 9px; transition: .2s ease; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
+    .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,.16); }
+    .btn-primary { background: linear-gradient(135deg, #7c3aed, #06b6d4); border: 0; box-shadow: 0 14px 36px rgba(6,182,212,.22); }
+    .side-card { padding: 24px; display: grid; gap: 14px; }
+    .radar-score { border-radius: 22px; padding: 20px; background: conic-gradient(from 220deg, rgba(34,211,238,.85), rgba(139,92,246,.95), rgba(45,212,191,.85), rgba(34,211,238,.85)); position: relative; min-height: 210px; display: grid; place-items: center; overflow: hidden; }
+    .radar-score:before { content: ""; position: absolute; inset: 10px; border-radius: 18px; background: rgba(8,12,24,.88); }
+    .radar-score > div { position: relative; text-align: center; }
+    .score-num { font-size: 62px; font-weight: 900; letter-spacing: -.06em; }
+    .score-label { color: var(--muted); }
+    .note { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
+    .stat { padding: 18px; border: 1px solid var(--line); background: rgba(255,255,255,.065); border-radius: 20px; }
+    .stat b { font-size: 28px; display: block; letter-spacing: -.04em; }
+    .stat span { color: var(--muted); font-size: 13px; }
+    .toolbar { display: grid; grid-template-columns: 1.35fr repeat(4, minmax(120px, .42fr)); gap: 12px; margin: 22px 0 16px; position: sticky; top: 10px; z-index: 4; }
+    .field { min-width: 0; border: 1px solid var(--line); background: rgba(10,14,27,.82); color: var(--text); border-radius: 16px; padding: 12px 14px; outline: none; backdrop-filter: blur(18px); }
+    .field:focus { border-color: rgba(34,211,238,.7); box-shadow: 0 0 0 4px rgba(34,211,238,.12); }
+    option { color: #111827; }
+    .content { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; padding-bottom: 40px; }
+    .sidebar { position: sticky; top: 86px; padding: 18px; }
+    .sidebar h3, .panel h3 { margin: 0 0 14px; letter-spacing: -.03em; }
+    .checklist { display: grid; gap: 10px; }
+    .check { padding: 12px; border-radius: 16px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.08); color: #dbeafe; font-size: 13px; line-height: 1.55; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .company { border: 1px solid var(--line); border-radius: 22px; background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.045)); overflow: hidden; box-shadow: 0 16px 54px rgba(0,0,0,.22); }
+    .company-head { padding: 17px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.09); }
+    .company-title { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+    .avatar { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 16px; display: grid; place-items: center; font-weight: 900; background: linear-gradient(135deg, rgba(139,92,246,.85), rgba(34,211,238,.85)); color: white; box-shadow: 0 12px 28px rgba(0,0,0,.22); }
+    .company h2 { font-size: 19px; margin: 0; letter-spacing: -.03em; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .badge { border-radius: 999px; padding: 5px 8px; font-size: 12px; border: 1px solid rgba(255,255,255,.12); color: #dbeafe; background: rgba(255,255,255,.065); }
+    .p0 { color: #fff; background: rgba(251,113,133,.22); border-color: rgba(251,113,133,.45); }
+    .p1 { color: #fff; background: rgba(96,165,250,.2); border-color: rgba(96,165,250,.44); }
+    .p2 { background: rgba(45,212,191,.16); border-color: rgba(45,212,191,.35); }
+    .open { background: rgba(45,212,191,.18); border-color: rgba(45,212,191,.42); }
+    .watch { background: rgba(251,191,36,.18); border-color: rgba(251,191,36,.42); }
+    .blocked { background: rgba(251,113,133,.18); border-color: rgba(251,113,133,.42); }
+    .fit { text-align: right; min-width: 74px; }
+    .fit b { display: block; font-size: 25px; letter-spacing: -.06em; }
+    .fit span { color: var(--muted); font-size: 12px; }
+    .company-body { padding: 16px 17px 18px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mini { border-radius: 15px; padding: 11px; background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.075); min-height: 68px; }
+    .mini small { color: var(--muted); display: block; margin-bottom: 6px; }
+    .mini div { font-size: 13px; line-height: 1.45; }
+    .reason { margin: 12px 0; color: #d8e4f5; line-height: 1.65; font-size: 14px; }
+    .job-list { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 14px; }
+    .job-chip { font-size: 12px; padding: 7px 9px; border-radius: 11px; color: #dbeafe; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.09); }
+    .ops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; }
+    .ops select { width: 100%; }
+    .link-row { display: flex; gap: 10px; margin-top: 12px; }
+    .open-link { flex: 1; text-align: center; padding: 11px 12px; border-radius: 14px; background: rgba(34,211,238,.16); border: 1px solid rgba(34,211,238,.28); font-weight: 760; }
+    .copy-link { padding: 11px 12px; border-radius: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); color: white; cursor: pointer; }
+    textarea.note-input { width: 100%; min-height: 54px; resize: vertical; margin-top: 10px; }
+    .timeline { margin-top: 16px; display: grid; gap: 10px; }
+    .timeline-item { display: flex; gap: 10px; align-items: flex-start; color: #dbeafe; font-size: 13px; }
+    .dot { width: 9px; height: 9px; margin-top: 5px; border-radius: 999px; background: var(--brand-2); box-shadow: 0 0 0 5px rgba(34,211,238,.12); }
+    .empty { display:none; text-align:center; padding: 54px; color: var(--muted); }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; padding: 13px 16px; border-radius: 16px; background: rgba(15,23,42,.92); border: 1px solid var(--line); color: #fff; box-shadow: var(--shadow); transition: .22s ease; z-index: 20; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .modal { position: fixed; inset: 0; display:none; place-items:center; background: rgba(0,0,0,.55); z-index: 30; padding: 20px; }
+    .modal.show { display:grid; }
+    .modal-card { width: min(720px, 96vw); border-radius: 24px; border: 1px solid var(--line); background: rgba(10,14,27,.96); box-shadow: var(--shadow); padding: 24px; }
+    .modal-card h2 { margin: 0 0 10px; }
+    .modal-card p { color: #cbd5e1; line-height: 1.75; }
+    .kbd { border-radius: 8px; padding: 2px 7px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
+    @media (max-width: 1120px) {
+      .hero-grid, .content { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .toolbar { grid-template-columns: 1fr 1fr; position: static; }
+    }
+    @media (max-width: 760px) {
+      .cards, .stats, .grid-2, .ops { grid-template-columns: 1fr; }
+      .hero-card { padding: 24px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="topbar">
+        <div class="logo"><div class="logo-mark">雷</div><div>纪辉 · AI PM 秋招雷达</div></div>
+        <div class="pill" id="lastRefresh">上次刷新：未刷新</div>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-card">
+          <div class="pill">2027 届 · AI 产品 / 大模型数据 / 评测治理 / Agent 方向</div>
+          <h1>先把能投的 40 家摆上桌，别再靠脑子硬记。</h1>
+          <p class="lead">这是给你自己用的秋招看板：公司优先级、匹配理由、投递入口、投递/面试状态、备注都放在一起。第一批按你的背景排，<span class="em">AI 数据评测类 PM 优先，AI 应用 PM 次之，平台工程向兜底。</span></p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="refreshBtn">刷新雷达</button>
+            <button class="btn" id="exportBtn">导出 CSV</button>
+            <button class="btn" id="resetBtn">重置状态</button>
+            <button class="btn" id="aboutBtn">怎么用</button>
+          </div>
+        </div>
+        <div class="panel side-card">
+          <div class="radar-score"><div><div class="score-num" id="avgScore">--</div><div class="score-label">首批平均匹配分</div></div></div>
+          <div class="note">我没把你给的 API Key 写进前端。前端会暴露密钥，这事太蠢，咱不干。后面要真做自动抓取，应该接一个后端定时任务。</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="statTotal">0</b><span>首批公司</span></div>
+        <div class="stat"><b id="statP0">0</b><span>P0/P1 高优先级</span></div>
+        <div class="stat"><b id="statOpen">0</b><span>已开放/可尝试</span></div>
+        <div class="stat"><b id="statApplied">0</b><span>已推进投递</span></div>
+      </div>
+      <div class="toolbar">
+        <input class="field" id="q" placeholder="搜公司 / 岗位 / 城市 / 关键词，比如：评测、Agent、北京、独角兽" />
+        <select class="field" id="priorityFilter"><option value="all">全部优先级</option><option value="P0">P0 必投</option><option value="P1">P1 强投</option><option value="P2">P2 可投</option><option value="P3">P3 观察</option></select>
+        <select class="field" id="typeFilter"><option value="all">全部类型</option><option value="大厂">大厂</option><option value="AI独角兽">AI独角兽</option><option value="中场/垂直AI">中场/垂直AI</option><option value="硬件/云/ICT">硬件/云/ICT</option></select>
+        <select class="field" id="openFilter"><option value="all">全部开放状态</option><option value="已开放">已开放</option><option value="待确认">待确认</option><option value="特殊处理">特殊处理</option></select>
+        <select class="field" id="statusFilter"><option value="all">全部投递状态</option><option value="未投递">未投递</option><option value="准备中">准备中</option><option value="已投递">已投递</option><option value="笔试">笔试</option><option value="一面">一面</option><option value="二面">二面</option><option value="HR面">HR面</option><option value="OC">OC</option><option value="拒绝">拒绝</option></select>
+      </div>
+    </section>
+
+    <section class="content">
+      <aside class="panel sidebar">
+        <h3>投递前别犯蠢清单</h3>
+        <div class="checklist">
+          <div class="check">ATS 表单别写“详见附件简历”，手填字段要认真贴。</div>
+          <div class="check">优先投：AI PM / 大模型数据 / 评测治理 / Agent 产品。</div>
+          <div class="check">硕士硬门槛直接跳过，本科别硬送人头。</div>
+          <div class="check">腾讯、美团、作业帮这类有投递次数/锁简历规则，先看规则再点。</div>
+          <div class="check">字节你现在在实习，秋招网申先当参考，转正走内部链路。</div>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item"><span class="dot"></span><span>第一轮：P0/P1 先投 12–18 家，别平均用力。</span></div>
+          <div class="timeline-item"><span class="dot"></span><span>第二轮：一周后刷新，看新增开放和补招。</span></div>
+          <div class="timeline-item"><span class="dot"></span><span>第三轮：按面试反馈反向改简历关键词。</span></div>
+        </div>
+      </aside>
+      <div>
+        <div class="cards" id="cards"></div>
+        <div class="panel empty" id="empty">没筛出来。换个关键词，别把自己筛没了。</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h2>怎么用这个秋招雷达</h2>
+      <p>先按默认排序从上往下投。每张卡的状态和备注都会存在你当前浏览器的 localStorage 里，刷新页面不会丢。点“刷新雷达”会重新计算看板、识别本地数据里新增的公司；真正联网抓岗位需要后端定时任务，不能把 API Key 放前端。</p>
+      <p>快捷键：按 <span class="kbd">/</span> 聚焦搜索框。建议你先把 P0/P1 里“已开放”的公司推进到“准备中/已投递”，别在 P3 观察项里消耗精力。</p>
+      <div class="hero-actions"><button class="btn btn-primary" id="closeModal">知道了，开投</button></div>
+    </div>
+  </div>
+
+  <script>
+    const companies = [
+      {id:'tencent',name:'腾讯',type:'大厂',priority:'P0',score:95,open:'已开放',city:'北京/深圳/上海/广州',roles:['AI产品经理培训生','混元/AI应用产品','内容/平台产品'],url:'https://join.qq.com/post.html?query=p_1,p_4',rule:'AI 产品专项很适合冲；腾讯简历和意向选择规则严格，别乱点。',reason:'AI 产品经理培训生和你“AI评测+数据治理+产品实习”的叙事能接上，且腾讯专项对AI产品兴趣和产品潜力更友好。'},
+      {id:'baidu',name:'百度',type:'大厂',priority:'P0',score:94,open:'已开放',city:'北京/上海/深圳',roles:['AI产品经理','大模型应用产品','搜索/智能体产品'],url:'https://talent.baidu.com/jobs/list',rule:'重点看 AIDU/大模型/智能体/搜索相关，算法岗别硬投。',reason:'百度是AI主线最强的大厂之一，你的OCR/VLM评测和数据链路经验适合包装成“大模型效果优化产品能力”。'},
+      {id:'alibaba',name:'阿里巴巴',type:'大厂',priority:'P0',score:92,open:'已开放',city:'杭州/北京/上海',roles:['AI产品经理','平台产品','业务产品'],url:'https://campus-talent.alibaba.com/?lang=zh',rule:'同批次投递机会宝贵，阿里系和淘天别重复乱占坑。',reason:'阿里有大模型应用、云、业务AI化场景，适合你投AI平台/数据产品/应用产品，不建议投纯商业增长。'},
+      {id:'bytedance',name:'字节跳动',type:'大厂',priority:'P0',score:91,open:'特殊处理',city:'北京/上海/深圳/杭州',roles:['AI产品经理','AI数据产品','评测治理'],url:'https://jobs.bytedance.com/campus/position',rule:'你正在字节实习，校招网申先不作为主路径；重点盯内部转正和导师链路。',reason:'匹配度最高但路径特殊。你现在最该做的是把实习项目结果做扎实，别把秋招动作和内部转正链路打架。'},
+      {id:'meituan',name:'美团',type:'大厂',priority:'P1',score:88,open:'已开放',city:'北京/上海/成都',roles:['AI产品','平台产品','数据产品'],url:'https://zhaopin.meituan.com/web/position?jobType=campus',rule:'最多 3 个志愿，笔试后简历锁定。先确定排序再投。',reason:'美团产品训练强，AI+业务效率/平台产品可投，但与你最强的模型评测方向不是完全一条线。'},
+      {id:'jd',name:'京东',type:'大厂',priority:'P1',score:86,open:'已开放',city:'北京/成都/宿迁/深圳',roles:['技术产品经理','AI产品','平台产品'],url:'https://campus.jd.com/#/jobs',rule:'技术产品经理优先，运营/商业分析谨慎。',reason:'JD 技术产品经理岗位和AI工具、B/C端产品策划相关，你的AI产品实习能覆盖基础要求。'},
+      {id:'huawei',name:'华为',type:'硬件/云/ICT',priority:'P1',score:84,open:'已开放',city:'北京/深圳/上海/杭州/南京',roles:['AI产品经理','云产品经理','解决方案产品'],url:'https://career.huawei.com/cn/campus-recruitment-job-list',rule:'岗位体系复杂，优先搜 AI、云、盘古、数据治理、产品经理。',reason:'华为云/盘古/ICT产品体系偏平台和解决方案，你的技术理解能加分，但要补ToB表达。'},
+      {id:'deepseek',name:'DeepSeek',type:'AI独角兽',priority:'P0',score:93,open:'已开放',city:'北京/杭州',roles:['AI产品经理','AI产品运营','模型数据策略'],url:'https://talent.deepseek.com/',rule:'高门槛，可能邮箱投递或官网投递；材料要极其硬。',reason:'公司光环强，岗位方向贴AI核心。但竞争会非常变态，投可以投，别把它当稳定盘。'},
+      {id:'moonshot',name:'月之暗面',type:'AI独角兽',priority:'P0',score:90,open:'已开放',city:'北京/上海',roles:['AI产品','开发者生态','API商业化'],url:'https://app.mokahr.com/su/PHQF7',rule:'穿越计划名额少，投递材料要写出AI产品判断。',reason:'Kimi/API/Agent 场景适合讲AI应用产品与评测闭环，门槛高但值得冲。'},
+      {id:'zhipu',name:'智谱',type:'AI独角兽',priority:'P0',score:89,open:'待确认',city:'北京',roles:['AI产品经理','Agent产品','大模型应用'],url:'https://app.mokahr.com/campus-recruitment/zphz/148984#/jobs',rule:'注意区分实习、校招、社招；Agent方向优先。',reason:'智谱的Agent和MaaS生态与你AI产品/评测经历贴合，尤其适合强调“标准、评测、闭环”。'},
+      {id:'minimax',name:'MiniMax',type:'AI独角兽',priority:'P0',score:88,open:'待确认',city:'北京/上海/深圳',roles:['AI产品','多模态产品','海外AI产品'],url:'https://www.minimaxi.com/careers',rule:'2027窗口需手动确认，重点盯产品/数据/运营类。',reason:'多模态和AI应用方向适合你，但公开岗位变化快，要每周看。'},
+      {id:'stepfun',name:'阶跃星辰',type:'AI独角兽',priority:'P1',score:86,open:'待确认',city:'上海/北京',roles:['大模型产品','多模态产品','平台产品'],url:'https://www.stepfun.com/career',rule:'官网岗位需手动确认，若无校招可走实习/社招实习。',reason:'多模态/大模型平台方向很对口，缺点是校招入口不一定稳定。'},
+      {id:'01ai',name:'零一万物',type:'AI独角兽',priority:'P1',score:84,open:'待确认',city:'北京/上海',roles:['AI应用产品','大模型平台','Agent产品'],url:'https://www.lingyiwanwu.com/',rule:'官网未必有完整校招页，建议同步搜公众号/招聘平台。',reason:'AI Native应用方向和你目标一致，但需要确认是否收27届PM。'},
+      {id:'baichuan',name:'百川智能',type:'AI独角兽',priority:'P1',score:83,open:'待确认',city:'北京',roles:['AI产品','大模型应用','数据产品'],url:'https://www.baichuan-ai.com/',rule:'优先找官方招聘入口或公众号。',reason:'医疗/助手/大模型应用均可包装你的评测经验，但岗位透明度较低。'},
+      {id:'modelbest',name:'面壁智能',type:'AI独角兽',priority:'P1',score:82,open:'待确认',city:'北京',roles:['端侧AI产品','Agent产品','大模型应用'],url:'https://www.modelbest.cn/',rule:'重点盯实习和校招补录。',reason:'端侧模型与Agent方向有想象力，适合作为AI独角兽补充盘。'},
+      {id:'sensetime',name:'商汤科技',type:'中场/垂直AI',priority:'P1',score:84,open:'已开放',city:'北京/上海/深圳/杭州',roles:['产品经理','大模型产品','计算机视觉产品'],url:'https://www.sensetime.com/cn/join-us',rule:'招满即止，产品岗要尽快点进去确认。',reason:'AI公司标签强，CV/多模态/大模型场景能接上你的多模态评测经历。'},
+      {id:'iflytek',name:'科大讯飞',type:'中场/垂直AI',priority:'P1',score:82,open:'待确认',city:'合肥/北京/上海/深圳',roles:['AI产品经理','教育AI产品','语音产品'],url:'https://campus.iflytek.com/official-pc/careers',rule:'AI语音/教育产品老牌，注意岗位城市和事业部。',reason:'教育AI、语音、多模态方向适合投，但要避免偏销售/解决方案岗。'},
+      {id:'xiaohongshu',name:'小红书',type:'大厂',priority:'P1',score:82,open:'已开放',city:'北京/上海',roles:['推荐策略产品','AI产品','内容生态产品'],url:'https://job.xiaohongshu.com/campus/position',rule:'页面可能同时挂不同届次，必须确认27届。',reason:'内容生态+推荐评估能和你评测体系经验挂钩，但C端经验是短板。'},
+      {id:'zhihu',name:'知乎',type:'中场/垂直AI',priority:'P1',score:81,open:'已开放',city:'北京/成都',roles:['大模型数据运营','推荐策略产品','增长产品'],url:'https://app.mokahr.com/campus-recruitment/zhihu/68321#/jobs',rule:'大模型数据运营和推荐策略优先，商业增长谨慎。',reason:'你自整理清单里知乎大模型数据运营匹配分高，适合作为AI数据评测类强投。'},
+      {id:'zuoyebang',name:'作业帮',type:'中场/垂直AI',priority:'P1',score:80,open:'已开放',city:'北京',roles:['AI产品经理','平台产品经理','数据分析'],url:'https://app.mokahr.com/campus-recruitment/zuoyebang/39595#/jobs',rule:'同一时间仅可提交 1 个申请，别乱占坑。',reason:'AI产品经理岗位和提示词、标注、评测能力匹配，但教育/直播业务经验是短板。'},
+      {id:'didi',name:'滴滴',type:'大厂',priority:'P1',score:79,open:'已开放',city:'北京/上海/深圳/杭州',roles:['AI客服产品','国际化出行策略','产品助理'],url:'https://campus.didiglobal.com/campus_apply/didiglobal/96064#/jobs',rule:'每人 3 次主动投递机会，优先AI客服和策略产品。',reason:'AI客服/策略产品能接上你的闭环迭代能力，其他运营类别乱投。'},
+      {id:'kuaishou',name:'快手',type:'大厂',priority:'P2',score:78,open:'已开放',city:'北京/杭州/深圳',roles:['AI产品','推荐/内容产品','平台产品'],url:'https://campus.kuaishou.cn/recruit/campus/e/#/campus/job-list',rule:'岗位列表可能登录可见，先看快Star和产品类。',reason:'内容推荐和AI应用场景多，但岗位检索成本较高，放P2推进。'},
+      {id:'netease',name:'网易',type:'大厂',priority:'P2',score:77,open:'已开放',city:'杭州/广州/北京/上海',roles:['AI产品','有道AI教育产品','平台产品'],url:'https://campus.163.com/app/summary/campus/list',rule:'游戏岗和互联网岗入口分开，有道方向值得看。',reason:'网易有道/AI教育产品适合投，游戏产品策划与你主线不贴。'},
+      {id:'xiaomi',name:'小米',type:'硬件/云/ICT',priority:'P2',score:76,open:'已开放',city:'北京/上海/武汉/深圳/南京',roles:['AI产品','IoT产品','汽车智能产品'],url:'https://hr.xiaomi.com/campus',rule:'AI大模型、IoT、汽车智能方向优先。',reason:'硬件+AI场景可投，但你的过往偏数据评测，需要补用户/硬件场景理解。'},
+      {id:'oppo',name:'OPPO',type:'硬件/云/ICT',priority:'P2',score:75,open:'已开放',city:'深圳/东莞/北京/上海',roles:['AI产品','手机系统产品','IoT产品'],url:'https://careers.oppo.com/university/oppo/campus',rule:'流程可能含AI面试，提前准备。',reason:'手机AI/端侧AI是好方向，但需要把你经历翻译成用户体验和端侧智能能力。'},
+      {id:'vivo',name:'vivo',type:'硬件/云/ICT',priority:'P2',score:73,open:'待确认',city:'深圳/东莞/南京/杭州',roles:['AI产品','系统产品','用户体验产品'],url:'https://hr.vivo.com/wt/vivo/web/index/campus',rule:'确认27届校招开放后再投。',reason:'端侧AI产品可关注，但不是你第一优势区。'},
+      {id:'lenovo',name:'联想',type:'硬件/云/ICT',priority:'P2',score:72,open:'已开放',city:'北京/上海/深圳/武汉',roles:['AI PC产品','智能设备产品','平台产品'],url:'https://talent.lenovo.com.cn/campus',rule:'AI PC和企业AI方向优先。',reason:'AI PC是新叙事，可投产品与销售/方案中偏产品的岗位。'},
+      {id:'ant',name:'蚂蚁集团',type:'大厂',priority:'P2',score:76,open:'待确认',city:'杭州/上海/北京',roles:['AI产品','金融科技产品','平台产品'],url:'https://talent.antgroup.com/campus-position',rule:'金融风控/支付产品要谨慎，AI平台方向优先。',reason:'平台产品训练强，但金融业务经验不足，适合作为P2强补。'},
+      {id:'taotian',name:'淘天集团',type:'大厂',priority:'P2',score:75,open:'已开放',city:'杭州/北京/上海',roles:['产品经理','AIGC产品','商家/供给产品'],url:'https://talent.taotian.com/campus',rule:'阿里系投递池可能冲突，和阿里集团择优。',reason:'电商AI和供给产品可投，但不如AI评测/平台方向贴合。'},
+      {id:'pdd',name:'拼多多',type:'大厂',priority:'P2',score:72,open:'待确认',city:'上海/深圳/广州',roles:['产品管培','数据产品','平台产品'],url:'https://careers.pddglobalrecruit.com/campus',rule:'强业务强压力，岗位方向确认后再决定。',reason:'产品训练强，但AI PM 对口度不确定，放观察强投之间。'},
+      {id:'bilibili',name:'B站',type:'中场/垂直AI',priority:'P2',score:70,open:'已开放',city:'上海/北京/深圳',roles:['视频生成评测','多模态数据智能','内容产品'],url:'https://jobs.bilibili.com/campus/positions',rule:'招满即止；算法岗别硬投，找评测/数据/产品运营。',reason:'多模态内容和视频评测有一定适配，但公开岗位多偏技术。'},
+      {id:'ctrip',name:'携程',type:'中场/垂直AI',priority:'P2',score:69,open:'已开放',city:'上海/北京',roles:['AI产品实习生','AIGC产品','旅行产品'],url:'https://campus.ctrip.com/campus-recruitment/ctrip/119594#/jobs',rule:'目前偏实习，正式校招待看。',reason:'AIGC旅行应用可以投，但旅行业务不是你的主场。'},
+      {id:'intsig',name:'合合信息',type:'中场/垂直AI',priority:'P2',score:78,open:'已开放',city:'上海',roles:['AI产品经理','文档智能产品','OCR产品'],url:'https://www.intsig.com/cn/career',rule:'重点找OCR/文档智能/AI产品。',reason:'你做过OCR/VLM多语种评测，和合合的文档智能非常好讲。'},
+      {id:'infini',name:'无问芯穹',type:'AI独角兽',priority:'P2',score:74,open:'已开放',city:'北京/上海',roles:['产品经理','AI Infra产品','算力平台产品'],url:'https://www.infini-ai.com/',rule:'入口可能在官网/公众号，先手动确认岗位。',reason:'AI Infra方向可用你训练数据链路经验切入，但偏平台技术。'},
+      {id:'anker',name:'安克创新',type:'硬件/云/ICT',priority:'P3',score:65,open:'待确认',city:'深圳/长沙/海外',roles:['AI硬件产品','消费电子产品','用户研究'],url:'https://campus.anker.com/',rule:'硬件消费电子为主，AI PM不是主线。',reason:'品牌和产品训练不错，但和你的大模型数据评测主线较远。'},
+      {id:'transsion',name:'传音控股',type:'硬件/云/ICT',priority:'P3',score:64,open:'已开放',city:'深圳/上海/重庆',roles:['AI产品类','海外产品','影像AI'],url:'https://campus.transsion.com/',rule:'TAIG-AI可能硕士及以上，本科先确认普通批。',reason:'海外AI产品有机会，但学历/方向门槛需要确认。'},
+      {id:'zte',name:'中兴通讯',type:'硬件/云/ICT',priority:'P3',score:62,open:'已开放',city:'深圳/南京/上海/西安',roles:['产品经理','技术营销','解决方案'],url:'https://job.zte.com.cn/',rule:'未来领军通常门槛高，普通产品岗另找。',reason:'ICT产品可兜底，但你AI PM主线不应过早消耗精力。'},
+      {id:'h3c',name:'新华三',type:'硬件/云/ICT',priority:'P3',score:61,open:'已开放',city:'杭州/北京/合肥/成都',roles:['产品经理','云产品','网络安全产品'],url:'https://career.h3c.com/campus',rule:'云/安全/AI平台方向优先。',reason:'平台产品可投，但行业吸引力和AI主线稍弱。'},
+      {id:'ctyun',name:'天翼云',type:'硬件/云/ICT',priority:'P3',score:60,open:'已开放',city:'北京/上海/广州/深圳/成都',roles:['云产品经理','AI平台产品','解决方案'],url:'https://ctyun.hotjob.cn',rule:'国企云流程慢，作为稳定兜底。',reason:'云平台产品能兜底，但节奏和成长曲线不一定最适合你。'},
+      {id:'mihoyo',name:'米哈游',type:'中场/垂直AI',priority:'P3',score:58,open:'已开放',city:'上海/北京',roles:['产品策划','AI内容工具','数据分析'],url:'https://campus.mihoyo.com/',rule:'游戏策划为主，不要硬凑AI PM。',reason:'除非出现AI工具/内容生产产品，否则不建议占太多时间。'}
+    ];
+
+    const statusOptions = ['未投递','准备中','已投递','笔试','一面','二面','HR面','OC','泡池','拒绝','放弃'];
+    const storeKey = 'hugh-autumn-radar-v1';
+    const defaultState = {
+      "tencent": {"status":"已投递","interview":"未开始","note":"ai产品经理","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "baidu": {"status":"已投递","interview":"未开始","note":"大模型AI数据训练师","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "alibaba": {"status":"已投递","interview":"未开始","note":"ai产品经理、ai应用产品经理（七个事业群）","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "bytedance": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "meituan": {"status":"准备中","interview":"未开始","note":"8.17开始秋招","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "jd": {"status":"已投递","interview":"待笔试","note":"已投递，待评测","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "huawei": {"status":"已投递","interview":"未开始","note":"AI模型工程师-AI模型评测","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "deepseek": {"status":"已投递","interview":"未开始","note":"ai产品经理","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "moonshot": {"status":"已投递","interview":"未开始","note":"大模型eval评测","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "zhipu": {"status":"未投递","interview":"未开始","note":"未开始27秋招","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "minimax": {"status":"未投递","interview":"未开始","note":"开了秋招，但没有产品岗","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "stepfun": {"status":"未投递","interview":"未开始","note":"秋招岗位很少 ","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "01ai": {"status":"已投递","interview":"未开始","note":"AI 产品经理（数据方向）","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "baichuan": {"status":"已投递","interview":"未开始","note":"ai产品经理","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "modelbest": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "sensetime": {"status":"已投递","interview":"未开始","note":"AI大模型产品经理\nAI产品经理\nAI视觉产品经理-SCG\nAI产品经理-大装置","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "iflytek": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "xiaohongshu": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "zhihu": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "zuoyebang": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "didi": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "kuaishou": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "netease": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "xiaomi": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "oppo": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "vivo": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "lenovo": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "ant": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "taotian": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "pdd": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "bilibili": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "ctrip": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "intsig": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "infini": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "anker": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "transsion": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "zte": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "h3c": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "ctyun": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "mihoyo": {"status":"未投递","interview":"未开始","note":"","updatedAt":"2026-08-16T21:58:00+08:00"},
+      "__knownIds": ["tencent","baidu","alibaba","bytedance","meituan","jd","huawei","deepseek","moonshot","zhipu","minimax","stepfun","01ai","baichuan","modelbest","sensetime","iflytek","xiaohongshu","zhihu","zuoyebang","didi","kuaishou","netease","xiaomi","oppo","vivo","lenovo","ant","taotian","pdd","bilibili","ctrip","intsig","infini","anker","transsion","zte","h3c","ctyun","mihoyo"],
+      "__lastRefresh": "2026-08-16T21:58:00+08:00"
+    };
+    let state = JSON.parse(localStorage.getItem(storeKey) || JSON.stringify(defaultState));
+    const $ = (id) => document.getElementById(id);
+    const toast = (msg) => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); };
+    const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+    const getStatus = (id) => state[id]?.status || '未投递';
+    const getNote = (id) => state[id]?.note || '';
+    const getInterview = (id) => state[id]?.interview || '未开始';
+    const badgeClass = (c) => c.priority.toLowerCase();
+    const openClass = (v) => v === '已开放' ? 'open' : v === '待确认' ? 'watch' : 'blocked';
+
+    function render() {
+      const q = $('q').value.trim().toLowerCase();
+      const pf = $('priorityFilter').value;
+      const tf = $('typeFilter').value;
+      const of = $('openFilter').value;
+      const sf = $('statusFilter').value;
+      let list = companies.filter(c => {
+        const blob = [c.name,c.type,c.priority,c.open,c.city,c.roles.join(' '),c.rule,c.reason].join(' ').toLowerCase();
+        return (!q || blob.includes(q)) && (pf==='all'||c.priority===pf) && (tf==='all'||c.type===tf) && (of==='all'||c.open===of) && (sf==='all'||getStatus(c.id)===sf);
+      }).sort((a,b) => {
+        const p = {P0:0,P1:1,P2:2,P3:3};
+        return p[a.priority]-p[b.priority] || b.score-a.score;
+      });
+      $('cards').innerHTML = list.map(cardHtml).join('');
+      $('empty').style.display = list.length ? 'none' : 'block';
+      bindCardEvents();
+      updateStats();
+    }
+
+    function cardHtml(c) {
+      const status = getStatus(c.id);
+      const interview = getInterview(c.id);
+      const note = getNote(c.id);
+      return `<article class="company" data-id="${c.id}">
+        <div class="company-head">
+          <div class="company-title"><div class="avatar">${c.name.slice(0,1)}</div><div><h2>${c.name}</h2><div class="sub">${c.type} · ${c.city}</div><div class="badges"><span class="badge ${badgeClass(c)}">${c.priority}</span><span class="badge ${openClass(c.open)}">${c.open}</span><span class="badge">${status}</span></div></div></div>
+          <div class="fit"><b>${c.score}</b><span>匹配分</span></div>
+        </div>
+        <div class="company-body">
+          <div class="grid-2"><div class="mini"><small>优先岗位</small><div>${c.roles.slice(0,2).join(' / ')}</div></div><div class="mini"><small>必看规则</small><div>${c.rule}</div></div></div>
+          <p class="reason">${c.reason}</p>
+          <div class="job-list">${c.roles.map(r=>`<span class="job-chip">${r}</span>`).join('')}</div>
+          <div class="ops"><select class="field status-select">${statusOptions.map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}</select><select class="field interview-select">${['未开始','待笔试','待一面','待二面','待HR','等结果','Offer沟通','结束'].map(s=>`<option ${s===interview?'selected':''}>${s}</option>`).join('')}</select></div>
+          <textarea class="field note-input" placeholder="备注：投递账号、内推人、面试时间、JD关键词...">${escapeHtml(note)}</textarea>
+          <div class="link-row"><a class="open-link" href="${c.url}" target="_blank" rel="noopener">打开投递入口</a><button class="copy-link" data-url="${c.url}">复制链接</button></div>
+        </div>
+      </article>`;
+    }
+
+    function escapeHtml(str) { return String(str).replace(/[&<>'"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s])); }
+    function bindCardEvents() {
+      document.querySelectorAll('.company').forEach(card => {
+        const id = card.dataset.id;
+        card.querySelector('.status-select').onchange = e => { state[id] = {...state[id], status:e.target.value, updatedAt:new Date().toISOString()}; save(); render(); toast('状态已保存'); };
+        card.querySelector('.interview-select').onchange = e => { state[id] = {...state[id], interview:e.target.value, updatedAt:new Date().toISOString()}; save(); toast('面试状态已保存'); };
+        card.querySelector('.note-input').oninput = e => { state[id] = {...state[id], note:e.target.value, updatedAt:new Date().toISOString()}; save(); };
+        card.querySelector('.copy-link').onclick = async e => { await navigator.clipboard.writeText(e.currentTarget.dataset.url); toast('链接复制好了'); };
+      });
+    }
+    function updateStats() {
+      const avg = Math.round(companies.reduce((s,c)=>s+c.score,0)/companies.length);
+      $('avgScore').textContent = avg;
+      $('statTotal').textContent = companies.length;
+      $('statP0').textContent = companies.filter(c=>['P0','P1'].includes(c.priority)).length;
+      $('statOpen').textContent = companies.filter(c=>c.open==='已开放').length;
+      $('statApplied').textContent = companies.filter(c=>!['未投递','放弃'].includes(getStatus(c.id))).length;
+      $('lastRefresh').textContent = '上次刷新：' + (state.__lastRefresh ? new Date(state.__lastRefresh).toLocaleString('zh-CN') : '未刷新');
+    }
+    function exportCsv() {
+      const rows = [['公司','类型','优先级','匹配分','开放状态','城市','优先岗位','投递状态','面试状态','备注','投递入口']];
+      companies.forEach(c => rows.push([c.name,c.type,c.priority,c.score,c.open,c.city,c.roles.join('/'),getStatus(c.id),getInterview(c.id),getNote(c.id),c.url]));
+      const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
+      const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '纪辉_秋招雷达_投递状态.csv'; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function refreshRadar() {
+      const known = new Set(state.__knownIds || []);
+      const fresh = companies.filter(c => !known.has(c.id));
+      state.__knownIds = companies.map(c=>c.id);
+      state.__lastRefresh = new Date().toISOString();
+      save(); render();
+      toast(fresh.length ? `发现 ${fresh.length} 家新增公司` : '已刷新：暂无新增公司，继续投，别磨叽');
+    }
+    ['q','priorityFilter','typeFilter','openFilter','statusFilter'].forEach(id => $(id).addEventListener('input', render));
+    $('exportBtn').onclick = exportCsv;
+    $('refreshBtn').onclick = refreshRadar;
+    $('resetBtn').onclick = () => { if(confirm('确定清空所有投递/面试状态和备注？')) { state = {}; save(); render(); toast('已清空'); } };
+    $('aboutBtn').onclick = () => $('modal').classList.add('show');
+    $('closeModal').onclick = () => $('modal').classList.remove('show');
+    $('modal').onclick = e => { if(e.target.id==='modal') $('modal').classList.remove('show'); };
+    window.addEventListener('keydown', e => { if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); $('q').focus(); } });
+    render();
+  </script>
+</body>
+</html>

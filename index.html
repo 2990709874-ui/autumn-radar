@@ -180,8 +180,8 @@
         <input class="field" id="q" placeholder="搜公司 / 岗位 / 城市 / 关键词，比如：评测、Agent、北京、独角兽" />
         <select class="field" id="priorityFilter"><option value="all">全部优先级</option><option value="P0">P0 必投</option><option value="P1">P1 强投</option><option value="P2">P2 可投</option><option value="P3">P3 观察</option></select>
         <select class="field" id="typeFilter"><option value="all">全部类型</option><option value="互联网/AI应用">互联网/AI应用</option><option value="云与ICT">云与ICT</option><option value="汽车智能化">汽车智能化</option><option value="机器人/具身智能">机器人/具身智能</option><option value="金融科技/银行科技">金融科技/银行科技</option><option value="央国企数字化">央国企数字化</option><option value="ToB软件/SaaS">ToB软件/SaaS</option></select>
-        <select class="field" id="openFilter"><option value="all">全部开放状态</option><option value="已开放">已开放</option><option value="招满即止">招满即止</option><option value="deadline明确">截止日明确</option><option value="待确认">待确认</option><option value="特殊处理">特殊处理</option></select>
-        <select class="field" id="statusFilter"><option value="all">全部投递状态</option><option value="未投递">未投递</option><option value="准备中">准备中</option><option value="已投递">已投递</option><option value="笔试">笔试</option><option value="一面">一面</option><option value="二面">二面</option><option value="HR面">HR面</option><option value="OC">OC</option><option value="拒绝">拒绝</option></select>
+        <select class="field" id="openFilter"><option value="all">全部开放状态</option><option value="已开放">已开放</option><option value="招满即止">招满即止</option><option value="deadline明确">截止日明确</option><option value="待确认">待确认</option><option value="特殊处理">特殊处理</option><option value="未开放">未开放</option></select>
+        <select class="field" id="statusFilter"><option value="all">全部投递状态</option><option value="未投递">未投递</option><option value="准备中">准备中</option><option value="已投递">已投递</option><option value="笔试">笔试</option><option value="一面">一面</option><option value="二面">二面</option><option value="HR面">HR面</option><option value="OC">OC</option><option value="泡池">泡池</option><option value="拒绝">拒绝</option><option value="放弃">放弃</option></select>
         <select class="field" id="deadlineFilter"><option value="all">全部截止日期</option><option value="today">今天截止</option><option value="7days">7天内截止</option><option value="future">后续截止</option><option value="none">未标截止</option><option value="past">已截止</option></select>
         <select class="field" id="sortBy"><option value="priority">优先级排序</option><option value="deadline">截止日期最近</option><option value="score">匹配分最高</option></select>
       </div>
@@ -220,6 +220,7 @@
     </div>
   </div>
 
+  <script src="snapshot-2026-10-08.js"></script>
   <script>
     const companies = [
   {
@@ -2394,7 +2395,9 @@
   }
 ];
 
+    AutumnRadarSnapshot.applyCompanySnapshot(companies);
     const statusOptions = ['未投递','准备中','已投递','笔试','一面','二面','HR面','OC','泡池','拒绝','放弃'];
+    const interviewOptions = ['未开始','待笔试','待一面','待二面','待HR','等结果','Offer沟通','结束'];
     const storeKey = 'hugh-autumn-radar-v1';
     const defaultState = {
       "tencent": {"status":"已投递","interview":"未开始","note":"ai产品经理","updatedAt":"2026-08-16T21:58:00+08:00"},
@@ -2445,9 +2448,10 @@
     function loadMergedState() {
       let savedState = {};
       try { savedState = JSON.parse(localStorage.getItem(storeKey) || '{}') || {}; } catch (error) { console.warn('本地状态解析失败，使用默认状态', error); }
-      const merged = {...completeDefaultState, ...savedState};
-      companies.forEach(c => { merged[c.id] = {...completeDefaultState[c.id], ...(savedState[c.id] || {})}; });
+      const migration = AutumnRadarSnapshot.migrateState(savedState, completeDefaultState);
+      const merged = migration.state;
       merged.__knownIds = [...new Set([...(completeDefaultState.__knownIds || []), ...(savedState.__knownIds || [])])];
+      if (migration.didMigrate) console.info(`已应用一次性 CSV 快照迁移：${AutumnRadarSnapshot.version}`);
       return merged;
     }
     let state = loadMergedState();
@@ -2501,7 +2505,7 @@
           <div class="grid-2"><div class="mini"><small>优先岗位</small><div>${c.roles.slice(0,2).map(escapeHtml).join(' / ')}</div></div><div class="mini"><small>截止日期</small><div class="${deadlineClass}">${escapeHtml(c.deadline || '未标截止 · 招满即止请尽早')}</div></div><div class="mini"><small>必看规则</small><div>${escapeHtml(c.rule)}</div></div><div class="mini"><small>学历提示</small><div>${escapeHtml(c.education || '逐岗确认')}</div></div></div>
           <p class="reason">${escapeHtml(c.reason)}</p>
           <div class="job-list">${c.roles.map(r=>`<span class="job-chip">${escapeHtml(r)}</span>`).join('')}</div>
-          <div class="ops"><select class="field status-select">${statusOptions.map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}</select><select class="field interview-select">${['未开始','待笔试','待一面','待二面','待HR','等结果','Offer沟通','结束'].map(s=>`<option ${s===interview?'selected':''}>${s}</option>`).join('')}</select></div>
+          <div class="ops"><select class="field status-select">${statusOptions.map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}</select><select class="field interview-select">${interviewOptions.map(s=>`<option ${s===interview?'selected':''}>${s}</option>`).join('')}</select></div>
           <textarea class="field note-input" placeholder="备注：投递账号、内推人、面试时间、JD关键词...">${escapeHtml(note)}</textarea>
           <div class="link-row"><a class="open-link" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">打开投递入口</a>${c.evidenceUrl?`<a class="evidence-link" href="${escapeHtml(c.evidenceUrl)}" target="_blank" rel="noopener">证据</a>`:''}<button class="copy-link" data-url="${escapeHtml(c.url)}">复制链接</button></div>
         </div>
@@ -2546,7 +2550,7 @@
     ['q','priorityFilter','typeFilter','openFilter','statusFilter','deadlineFilter','sortBy'].forEach(id => $(id).addEventListener('input', render));
     $('exportBtn').onclick = exportCsv;
     $('refreshBtn').onclick = refreshRadar;
-    $('resetBtn').onclick = () => { if(confirm('确定清空所有投递/面试状态和备注？')) { state = {...structuredClone(companyDefaults), __knownIds:companies.map(c=>c.id), __lastRefresh:'2026-10-08T18:02:00+08:00'}; save(); render(); toast('已清空'); } };
+    $('resetBtn').onclick = () => { if(confirm('确定清空所有投递/面试状态和备注？')) { state = {...structuredClone(companyDefaults), __knownIds:companies.map(c=>c.id), __lastRefresh:'2026-10-08T18:02:00+08:00', __snapshotVersion:AutumnRadarSnapshot.version}; save(); render(); toast('已清空'); } };
     $('aboutBtn').onclick = () => $('modal').classList.add('show');
     $('closeModal').onclick = () => $('modal').classList.remove('show');
     $('modal').onclick = e => { if(e.target.id==='modal') $('modal').classList.remove('show'); };

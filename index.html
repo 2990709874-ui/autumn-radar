@@ -74,7 +74,7 @@
     .stat { padding: 18px; border: 1px solid var(--line); background: rgba(255,255,255,.065); border-radius: 20px; }
     .stat b { font-size: 28px; display: block; letter-spacing: -.04em; }
     .stat span { color: var(--muted); font-size: 13px; }
-    .toolbar { display: grid; grid-template-columns: 1.35fr repeat(4, minmax(120px, .42fr)); gap: 12px; margin: 22px 0 16px; position: sticky; top: 10px; z-index: 4; }
+    .toolbar { display: grid; grid-template-columns: 1.35fr repeat(6, minmax(116px, .42fr)); gap: 12px; margin: 22px 0 16px; position: sticky; top: 10px; z-index: 4; }
     .field { min-width: 0; border: 1px solid var(--line); background: rgba(10,14,27,.82); color: var(--text); border-radius: 16px; padding: 12px 14px; outline: none; backdrop-filter: blur(18px); }
     .field:focus { border-color: rgba(34,211,238,.7); box-shadow: 0 0 0 4px rgba(34,211,238,.12); }
     option { color: #111827; }
@@ -98,6 +98,12 @@
     .open { background: rgba(45,212,191,.18); border-color: rgba(45,212,191,.42); }
     .watch { background: rgba(251,191,36,.18); border-color: rgba(251,191,36,.42); }
     .blocked { background: rgba(251,113,133,.18); border-color: rgba(251,113,133,.42); }
+    .deadline-today { color:#fff; background:rgba(251,113,133,.28); border-color:rgba(251,113,133,.72); box-shadow:0 0 0 3px rgba(251,113,133,.1); animation:pulse 1.6s ease-in-out infinite; }
+    .deadline-soon { color:#fff; background:rgba(251,191,36,.2); border-color:rgba(251,191,36,.55); }
+    .deadline-past { color:var(--muted); text-decoration:line-through; }
+    .deadline-none { color:var(--muted); }
+    .evidence-link { flex:0 0 auto; padding:11px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.055); color:#dbeafe; }
+    @keyframes pulse { 50% { box-shadow:0 0 0 7px rgba(251,113,133,.03); } }
     .fit { text-align: right; min-width: 74px; }
     .fit b { display: block; font-size: 25px; letter-spacing: -.06em; }
     .fit span { color: var(--muted); font-size: 12px; }
@@ -150,7 +156,7 @@
       <div class="hero-grid">
         <div class="hero-card">
           <div class="pill">2027 届 · AI 产品 / 大模型数据 / 评测治理 / Agent 方向</div>
-          <h1>先把能投的 40 家摆上桌，别再靠脑子硬记。</h1>
+          <h1>先把能投的 <span id="heroTotal">110</span> 家摆上桌，别再靠脑子硬记。</h1>
           <p class="lead">这是给你自己用的秋招看板：公司优先级、匹配理由、投递入口、投递/面试状态、备注都放在一起。第一批按你的背景排，<span class="em">AI 数据评测类 PM 优先，AI 应用 PM 次之，平台工程向兜底。</span></p>
           <div class="hero-actions">
             <button class="btn btn-primary" id="refreshBtn">刷新雷达</button>
@@ -160,12 +166,12 @@
           </div>
         </div>
         <div class="panel side-card">
-          <div class="radar-score"><div><div class="score-num" id="avgScore">--</div><div class="score-label">首批平均匹配分</div></div></div>
+          <div class="radar-score"><div><div class="score-num" id="avgScore">--</div><div class="score-label">公司池平均匹配分</div></div></div>
           <div class="note">我没把你给的 API Key 写进前端。前端会暴露密钥，这事太蠢，咱不干。后面要真做自动抓取，应该接一个后端定时任务。</div>
         </div>
       </div>
       <div class="stats">
-        <div class="stat"><b id="statTotal">0</b><span>首批公司</span></div>
+        <div class="stat"><b id="statTotal">0</b><span>目标公司池</span></div>
         <div class="stat"><b id="statP0">0</b><span>P0/P1 高优先级</span></div>
         <div class="stat"><b id="statOpen">0</b><span>已开放/可尝试</span></div>
         <div class="stat"><b id="statApplied">0</b><span>已推进投递</span></div>
@@ -173,9 +179,11 @@
       <div class="toolbar">
         <input class="field" id="q" placeholder="搜公司 / 岗位 / 城市 / 关键词，比如：评测、Agent、北京、独角兽" />
         <select class="field" id="priorityFilter"><option value="all">全部优先级</option><option value="P0">P0 必投</option><option value="P1">P1 强投</option><option value="P2">P2 可投</option><option value="P3">P3 观察</option></select>
-        <select class="field" id="typeFilter"><option value="all">全部类型</option><option value="大厂">大厂</option><option value="AI独角兽">AI独角兽</option><option value="中场/垂直AI">中场/垂直AI</option><option value="硬件/云/ICT">硬件/云/ICT</option></select>
-        <select class="field" id="openFilter"><option value="all">全部开放状态</option><option value="已开放">已开放</option><option value="待确认">待确认</option><option value="特殊处理">特殊处理</option></select>
+        <select class="field" id="typeFilter"><option value="all">全部类型</option><option value="互联网/AI应用">互联网/AI应用</option><option value="云与ICT">云与ICT</option><option value="汽车智能化">汽车智能化</option><option value="机器人/具身智能">机器人/具身智能</option><option value="金融科技/银行科技">金融科技/银行科技</option><option value="央国企数字化">央国企数字化</option><option value="ToB软件/SaaS">ToB软件/SaaS</option></select>
+        <select class="field" id="openFilter"><option value="all">全部开放状态</option><option value="已开放">已开放</option><option value="招满即止">招满即止</option><option value="deadline明确">截止日明确</option><option value="待确认">待确认</option><option value="特殊处理">特殊处理</option></select>
         <select class="field" id="statusFilter"><option value="all">全部投递状态</option><option value="未投递">未投递</option><option value="准备中">准备中</option><option value="已投递">已投递</option><option value="笔试">笔试</option><option value="一面">一面</option><option value="二面">二面</option><option value="HR面">HR面</option><option value="OC">OC</option><option value="拒绝">拒绝</option></select>
+        <select class="field" id="deadlineFilter"><option value="all">全部截止日期</option><option value="today">今天截止</option><option value="7days">7天内截止</option><option value="future">后续截止</option><option value="none">未标截止</option><option value="past">已截止</option></select>
+        <select class="field" id="sortBy"><option value="priority">优先级排序</option><option value="deadline">截止日期最近</option><option value="score">匹配分最高</option></select>
       </div>
     </section>
 
@@ -214,47 +222,2177 @@
 
   <script>
     const companies = [
-      {id:'tencent',name:'腾讯',type:'大厂',priority:'P0',score:95,open:'已开放',city:'北京/深圳/上海/广州',roles:['AI产品经理培训生','混元/AI应用产品','内容/平台产品'],url:'https://join.qq.com/post.html?query=p_1,p_4',rule:'AI 产品专项很适合冲；腾讯简历和意向选择规则严格，别乱点。',reason:'AI 产品经理培训生和你“AI评测+数据治理+产品实习”的叙事能接上，且腾讯专项对AI产品兴趣和产品潜力更友好。'},
-      {id:'baidu',name:'百度',type:'大厂',priority:'P0',score:94,open:'已开放',city:'北京/上海/深圳',roles:['AI产品经理','大模型应用产品','搜索/智能体产品'],url:'https://talent.baidu.com/jobs/list',rule:'重点看 AIDU/大模型/智能体/搜索相关，算法岗别硬投。',reason:'百度是AI主线最强的大厂之一，你的OCR/VLM评测和数据链路经验适合包装成“大模型效果优化产品能力”。'},
-      {id:'alibaba',name:'阿里巴巴',type:'大厂',priority:'P0',score:92,open:'已开放',city:'杭州/北京/上海',roles:['AI产品经理','平台产品','业务产品'],url:'https://campus-talent.alibaba.com/?lang=zh',rule:'同批次投递机会宝贵，阿里系和淘天别重复乱占坑。',reason:'阿里有大模型应用、云、业务AI化场景，适合你投AI平台/数据产品/应用产品，不建议投纯商业增长。'},
-      {id:'bytedance',name:'字节跳动',type:'大厂',priority:'P0',score:91,open:'特殊处理',city:'北京/上海/深圳/杭州',roles:['AI产品经理','AI数据产品','评测治理'],url:'https://jobs.bytedance.com/campus/position',rule:'你正在字节实习，校招网申先不作为主路径；重点盯内部转正和导师链路。',reason:'匹配度最高但路径特殊。你现在最该做的是把实习项目结果做扎实，别把秋招动作和内部转正链路打架。'},
-      {id:'meituan',name:'美团',type:'大厂',priority:'P1',score:88,open:'已开放',city:'北京/上海/成都',roles:['AI产品','平台产品','数据产品'],url:'https://zhaopin.meituan.com/web/position?jobType=campus',rule:'最多 3 个志愿，笔试后简历锁定。先确定排序再投。',reason:'美团产品训练强，AI+业务效率/平台产品可投，但与你最强的模型评测方向不是完全一条线。'},
-      {id:'jd',name:'京东',type:'大厂',priority:'P1',score:86,open:'已开放',city:'北京/成都/宿迁/深圳',roles:['技术产品经理','AI产品','平台产品'],url:'https://campus.jd.com/#/jobs',rule:'技术产品经理优先，运营/商业分析谨慎。',reason:'JD 技术产品经理岗位和AI工具、B/C端产品策划相关，你的AI产品实习能覆盖基础要求。'},
-      {id:'huawei',name:'华为',type:'硬件/云/ICT',priority:'P1',score:84,open:'已开放',city:'北京/深圳/上海/杭州/南京',roles:['AI产品经理','云产品经理','解决方案产品'],url:'https://career.huawei.com/cn/campus-recruitment-job-list',rule:'岗位体系复杂，优先搜 AI、云、盘古、数据治理、产品经理。',reason:'华为云/盘古/ICT产品体系偏平台和解决方案，你的技术理解能加分，但要补ToB表达。'},
-      {id:'deepseek',name:'DeepSeek',type:'AI独角兽',priority:'P0',score:93,open:'已开放',city:'北京/杭州',roles:['AI产品经理','AI产品运营','模型数据策略'],url:'https://talent.deepseek.com/',rule:'高门槛，可能邮箱投递或官网投递；材料要极其硬。',reason:'公司光环强，岗位方向贴AI核心。但竞争会非常变态，投可以投，别把它当稳定盘。'},
-      {id:'moonshot',name:'月之暗面',type:'AI独角兽',priority:'P0',score:90,open:'已开放',city:'北京/上海',roles:['AI产品','开发者生态','API商业化'],url:'https://app.mokahr.com/su/PHQF7',rule:'穿越计划名额少，投递材料要写出AI产品判断。',reason:'Kimi/API/Agent 场景适合讲AI应用产品与评测闭环，门槛高但值得冲。'},
-      {id:'zhipu',name:'智谱',type:'AI独角兽',priority:'P0',score:89,open:'待确认',city:'北京',roles:['AI产品经理','Agent产品','大模型应用'],url:'https://app.mokahr.com/campus-recruitment/zphz/148984#/jobs',rule:'注意区分实习、校招、社招；Agent方向优先。',reason:'智谱的Agent和MaaS生态与你AI产品/评测经历贴合，尤其适合强调“标准、评测、闭环”。'},
-      {id:'minimax',name:'MiniMax',type:'AI独角兽',priority:'P0',score:88,open:'待确认',city:'北京/上海/深圳',roles:['AI产品','多模态产品','海外AI产品'],url:'https://www.minimaxi.com/careers',rule:'2027窗口需手动确认，重点盯产品/数据/运营类。',reason:'多模态和AI应用方向适合你，但公开岗位变化快，要每周看。'},
-      {id:'stepfun',name:'阶跃星辰',type:'AI独角兽',priority:'P1',score:86,open:'待确认',city:'上海/北京',roles:['大模型产品','多模态产品','平台产品'],url:'https://www.stepfun.com/career',rule:'官网岗位需手动确认，若无校招可走实习/社招实习。',reason:'多模态/大模型平台方向很对口，缺点是校招入口不一定稳定。'},
-      {id:'01ai',name:'零一万物',type:'AI独角兽',priority:'P1',score:84,open:'待确认',city:'北京/上海',roles:['AI应用产品','大模型平台','Agent产品'],url:'https://www.lingyiwanwu.com/',rule:'官网未必有完整校招页，建议同步搜公众号/招聘平台。',reason:'AI Native应用方向和你目标一致，但需要确认是否收27届PM。'},
-      {id:'baichuan',name:'百川智能',type:'AI独角兽',priority:'P1',score:83,open:'待确认',city:'北京',roles:['AI产品','大模型应用','数据产品'],url:'https://www.baichuan-ai.com/',rule:'优先找官方招聘入口或公众号。',reason:'医疗/助手/大模型应用均可包装你的评测经验，但岗位透明度较低。'},
-      {id:'modelbest',name:'面壁智能',type:'AI独角兽',priority:'P1',score:82,open:'待确认',city:'北京',roles:['端侧AI产品','Agent产品','大模型应用'],url:'https://www.modelbest.cn/',rule:'重点盯实习和校招补录。',reason:'端侧模型与Agent方向有想象力，适合作为AI独角兽补充盘。'},
-      {id:'sensetime',name:'商汤科技',type:'中场/垂直AI',priority:'P1',score:84,open:'已开放',city:'北京/上海/深圳/杭州',roles:['产品经理','大模型产品','计算机视觉产品'],url:'https://www.sensetime.com/cn/join-us',rule:'招满即止，产品岗要尽快点进去确认。',reason:'AI公司标签强，CV/多模态/大模型场景能接上你的多模态评测经历。'},
-      {id:'iflytek',name:'科大讯飞',type:'中场/垂直AI',priority:'P1',score:82,open:'待确认',city:'合肥/北京/上海/深圳',roles:['AI产品经理','教育AI产品','语音产品'],url:'https://campus.iflytek.com/official-pc/careers',rule:'AI语音/教育产品老牌，注意岗位城市和事业部。',reason:'教育AI、语音、多模态方向适合投，但要避免偏销售/解决方案岗。'},
-      {id:'xiaohongshu',name:'小红书',type:'大厂',priority:'P1',score:82,open:'已开放',city:'北京/上海',roles:['推荐策略产品','AI产品','内容生态产品'],url:'https://job.xiaohongshu.com/campus/position',rule:'页面可能同时挂不同届次，必须确认27届。',reason:'内容生态+推荐评估能和你评测体系经验挂钩，但C端经验是短板。'},
-      {id:'zhihu',name:'知乎',type:'中场/垂直AI',priority:'P1',score:81,open:'已开放',city:'北京/成都',roles:['大模型数据运营','推荐策略产品','增长产品'],url:'https://app.mokahr.com/campus-recruitment/zhihu/68321#/jobs',rule:'大模型数据运营和推荐策略优先，商业增长谨慎。',reason:'你自整理清单里知乎大模型数据运营匹配分高，适合作为AI数据评测类强投。'},
-      {id:'zuoyebang',name:'作业帮',type:'中场/垂直AI',priority:'P1',score:80,open:'已开放',city:'北京',roles:['AI产品经理','平台产品经理','数据分析'],url:'https://app.mokahr.com/campus-recruitment/zuoyebang/39595#/jobs',rule:'同一时间仅可提交 1 个申请，别乱占坑。',reason:'AI产品经理岗位和提示词、标注、评测能力匹配，但教育/直播业务经验是短板。'},
-      {id:'didi',name:'滴滴',type:'大厂',priority:'P1',score:79,open:'已开放',city:'北京/上海/深圳/杭州',roles:['AI客服产品','国际化出行策略','产品助理'],url:'https://campus.didiglobal.com/campus_apply/didiglobal/96064#/jobs',rule:'每人 3 次主动投递机会，优先AI客服和策略产品。',reason:'AI客服/策略产品能接上你的闭环迭代能力，其他运营类别乱投。'},
-      {id:'kuaishou',name:'快手',type:'大厂',priority:'P2',score:78,open:'已开放',city:'北京/杭州/深圳',roles:['AI产品','推荐/内容产品','平台产品'],url:'https://campus.kuaishou.cn/recruit/campus/e/#/campus/job-list',rule:'岗位列表可能登录可见，先看快Star和产品类。',reason:'内容推荐和AI应用场景多，但岗位检索成本较高，放P2推进。'},
-      {id:'netease',name:'网易',type:'大厂',priority:'P2',score:77,open:'已开放',city:'杭州/广州/北京/上海',roles:['AI产品','有道AI教育产品','平台产品'],url:'https://campus.163.com/app/summary/campus/list',rule:'游戏岗和互联网岗入口分开，有道方向值得看。',reason:'网易有道/AI教育产品适合投，游戏产品策划与你主线不贴。'},
-      {id:'xiaomi',name:'小米',type:'硬件/云/ICT',priority:'P2',score:76,open:'已开放',city:'北京/上海/武汉/深圳/南京',roles:['AI产品','IoT产品','汽车智能产品'],url:'https://hr.xiaomi.com/campus',rule:'AI大模型、IoT、汽车智能方向优先。',reason:'硬件+AI场景可投，但你的过往偏数据评测，需要补用户/硬件场景理解。'},
-      {id:'oppo',name:'OPPO',type:'硬件/云/ICT',priority:'P2',score:75,open:'已开放',city:'深圳/东莞/北京/上海',roles:['AI产品','手机系统产品','IoT产品'],url:'https://careers.oppo.com/university/oppo/campus',rule:'流程可能含AI面试，提前准备。',reason:'手机AI/端侧AI是好方向，但需要把你经历翻译成用户体验和端侧智能能力。'},
-      {id:'vivo',name:'vivo',type:'硬件/云/ICT',priority:'P2',score:73,open:'待确认',city:'深圳/东莞/南京/杭州',roles:['AI产品','系统产品','用户体验产品'],url:'https://hr.vivo.com/wt/vivo/web/index/campus',rule:'确认27届校招开放后再投。',reason:'端侧AI产品可关注，但不是你第一优势区。'},
-      {id:'lenovo',name:'联想',type:'硬件/云/ICT',priority:'P2',score:72,open:'已开放',city:'北京/上海/深圳/武汉',roles:['AI PC产品','智能设备产品','平台产品'],url:'https://talent.lenovo.com.cn/campus',rule:'AI PC和企业AI方向优先。',reason:'AI PC是新叙事，可投产品与销售/方案中偏产品的岗位。'},
-      {id:'ant',name:'蚂蚁集团',type:'大厂',priority:'P2',score:76,open:'待确认',city:'杭州/上海/北京',roles:['AI产品','金融科技产品','平台产品'],url:'https://talent.antgroup.com/campus-position',rule:'金融风控/支付产品要谨慎，AI平台方向优先。',reason:'平台产品训练强，但金融业务经验不足，适合作为P2强补。'},
-      {id:'taotian',name:'淘天集团',type:'大厂',priority:'P2',score:75,open:'已开放',city:'杭州/北京/上海',roles:['产品经理','AIGC产品','商家/供给产品'],url:'https://talent.taotian.com/campus',rule:'阿里系投递池可能冲突，和阿里集团择优。',reason:'电商AI和供给产品可投，但不如AI评测/平台方向贴合。'},
-      {id:'pdd',name:'拼多多',type:'大厂',priority:'P2',score:72,open:'待确认',city:'上海/深圳/广州',roles:['产品管培','数据产品','平台产品'],url:'https://careers.pddglobalrecruit.com/campus',rule:'强业务强压力，岗位方向确认后再决定。',reason:'产品训练强，但AI PM 对口度不确定，放观察强投之间。'},
-      {id:'bilibili',name:'B站',type:'中场/垂直AI',priority:'P2',score:70,open:'已开放',city:'上海/北京/深圳',roles:['视频生成评测','多模态数据智能','内容产品'],url:'https://jobs.bilibili.com/campus/positions',rule:'招满即止；算法岗别硬投，找评测/数据/产品运营。',reason:'多模态内容和视频评测有一定适配，但公开岗位多偏技术。'},
-      {id:'ctrip',name:'携程',type:'中场/垂直AI',priority:'P2',score:69,open:'已开放',city:'上海/北京',roles:['AI产品实习生','AIGC产品','旅行产品'],url:'https://campus.ctrip.com/campus-recruitment/ctrip/119594#/jobs',rule:'目前偏实习，正式校招待看。',reason:'AIGC旅行应用可以投，但旅行业务不是你的主场。'},
-      {id:'intsig',name:'合合信息',type:'中场/垂直AI',priority:'P2',score:78,open:'已开放',city:'上海',roles:['AI产品经理','文档智能产品','OCR产品'],url:'https://www.intsig.com/cn/career',rule:'重点找OCR/文档智能/AI产品。',reason:'你做过OCR/VLM多语种评测，和合合的文档智能非常好讲。'},
-      {id:'infini',name:'无问芯穹',type:'AI独角兽',priority:'P2',score:74,open:'已开放',city:'北京/上海',roles:['产品经理','AI Infra产品','算力平台产品'],url:'https://www.infini-ai.com/',rule:'入口可能在官网/公众号，先手动确认岗位。',reason:'AI Infra方向可用你训练数据链路经验切入，但偏平台技术。'},
-      {id:'anker',name:'安克创新',type:'硬件/云/ICT',priority:'P3',score:65,open:'待确认',city:'深圳/长沙/海外',roles:['AI硬件产品','消费电子产品','用户研究'],url:'https://campus.anker.com/',rule:'硬件消费电子为主，AI PM不是主线。',reason:'品牌和产品训练不错，但和你的大模型数据评测主线较远。'},
-      {id:'transsion',name:'传音控股',type:'硬件/云/ICT',priority:'P3',score:64,open:'已开放',city:'深圳/上海/重庆',roles:['AI产品类','海外产品','影像AI'],url:'https://campus.transsion.com/',rule:'TAIG-AI可能硕士及以上，本科先确认普通批。',reason:'海外AI产品有机会，但学历/方向门槛需要确认。'},
-      {id:'zte',name:'中兴通讯',type:'硬件/云/ICT',priority:'P3',score:62,open:'已开放',city:'深圳/南京/上海/西安',roles:['产品经理','技术营销','解决方案'],url:'https://job.zte.com.cn/',rule:'未来领军通常门槛高，普通产品岗另找。',reason:'ICT产品可兜底，但你AI PM主线不应过早消耗精力。'},
-      {id:'h3c',name:'新华三',type:'硬件/云/ICT',priority:'P3',score:61,open:'已开放',city:'杭州/北京/合肥/成都',roles:['产品经理','云产品','网络安全产品'],url:'https://career.h3c.com/campus',rule:'云/安全/AI平台方向优先。',reason:'平台产品可投，但行业吸引力和AI主线稍弱。'},
-      {id:'ctyun',name:'天翼云',type:'硬件/云/ICT',priority:'P3',score:60,open:'已开放',city:'北京/上海/广州/深圳/成都',roles:['云产品经理','AI平台产品','解决方案'],url:'https://ctyun.hotjob.cn',rule:'国企云流程慢，作为稳定兜底。',reason:'云平台产品能兜底，但节奏和成长曲线不一定最适合你。'},
-      {id:'mihoyo',name:'米哈游',type:'中场/垂直AI',priority:'P3',score:58,open:'已开放',city:'上海/北京',roles:['产品策划','AI内容工具','数据分析'],url:'https://campus.mihoyo.com/',rule:'游戏策划为主，不要硬凑AI PM。',reason:'除非出现AI工具/内容生产产品，否则不建议占太多时间。'}
-    ];
+  {
+    "id": "tencent",
+    "name": "腾讯",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 95,
+    "open": "已开放",
+    "city": "北京/深圳/上海/广州",
+    "roles": [
+      "AI产品经理培训生",
+      "混元/AI应用产品",
+      "内容/平台产品"
+    ],
+    "url": "https://join.qq.com/post.html?query=p_1,p_4",
+    "rule": "AI 产品专项很适合冲；腾讯简历和意向选择规则严格，别乱点。",
+    "reason": "AI 产品经理培训生和你“AI评测+数据治理+产品实习”的叙事能接上，且腾讯专项对AI产品兴趣和产品潜力更友好。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "baidu",
+    "name": "百度",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 94,
+    "open": "已开放",
+    "city": "北京/上海/深圳",
+    "roles": [
+      "AI产品经理",
+      "大模型应用产品",
+      "搜索/智能体产品"
+    ],
+    "url": "https://talent.baidu.com/jobs/list",
+    "rule": "重点看 AIDU/大模型/智能体/搜索相关，算法岗别硬投。",
+    "reason": "百度是AI主线最强的大厂之一，你的OCR/VLM评测和数据链路经验适合包装成“大模型效果优化产品能力”。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "alibaba",
+    "name": "阿里巴巴",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 92,
+    "open": "已开放",
+    "city": "杭州/北京/上海",
+    "roles": [
+      "AI产品经理",
+      "平台产品",
+      "业务产品"
+    ],
+    "url": "https://campus-talent.alibaba.com/?lang=zh",
+    "rule": "同批次投递机会宝贵，阿里系和淘天别重复乱占坑。",
+    "reason": "阿里有大模型应用、云、业务AI化场景，适合你投AI平台/数据产品/应用产品，不建议投纯商业增长。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "bytedance",
+    "name": "字节跳动",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 91,
+    "open": "特殊处理",
+    "city": "北京/上海/深圳/杭州",
+    "roles": [
+      "AI产品经理",
+      "AI数据产品",
+      "评测治理"
+    ],
+    "url": "https://jobs.bytedance.com/campus/position",
+    "rule": "你正在字节实习，校招网申先不作为主路径；重点盯内部转正和导师链路。",
+    "reason": "匹配度最高但路径特殊。你现在最该做的是把实习项目结果做扎实，别把秋招动作和内部转正链路打架。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "meituan",
+    "name": "美团",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 88,
+    "open": "已开放",
+    "city": "北京/上海/成都",
+    "roles": [
+      "AI产品",
+      "平台产品",
+      "数据产品"
+    ],
+    "url": "https://zhaopin.meituan.com/web/position?jobType=campus",
+    "rule": "最多 3 个志愿，笔试后简历锁定。先确定排序再投。",
+    "reason": "美团产品训练强，AI+业务效率/平台产品可投，但与你最强的模型评测方向不是完全一条线。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "jd",
+    "name": "京东",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 86,
+    "open": "已开放",
+    "city": "北京/成都/宿迁/深圳",
+    "roles": [
+      "技术产品经理",
+      "AI产品",
+      "平台产品"
+    ],
+    "url": "https://campus.jd.com/#/jobs",
+    "rule": "技术产品经理优先，运营/商业分析谨慎。",
+    "reason": "JD 技术产品经理岗位和AI工具、B/C端产品策划相关，你的AI产品实习能覆盖基础要求。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "huawei",
+    "name": "华为",
+    "type": "云与ICT",
+    "priority": "P1",
+    "score": 84,
+    "open": "已开放",
+    "city": "北京/深圳/上海/杭州/南京",
+    "roles": [
+      "AI产品经理",
+      "云产品经理",
+      "解决方案产品"
+    ],
+    "url": "https://career.huawei.com/cn/campus-recruitment-job-list",
+    "rule": "岗位体系复杂，优先搜 AI、云、盘古、数据治理、产品经理。",
+    "reason": "华为云/盘古/ICT产品体系偏平台和解决方案，你的技术理解能加分，但要补ToB表达。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "deepseek",
+    "name": "DeepSeek",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 93,
+    "open": "已开放",
+    "city": "北京/杭州",
+    "roles": [
+      "AI产品经理",
+      "AI产品运营",
+      "模型数据策略"
+    ],
+    "url": "https://talent.deepseek.com/",
+    "rule": "高门槛，可能邮箱投递或官网投递；材料要极其硬。",
+    "reason": "公司光环强，岗位方向贴AI核心。但竞争会非常变态，投可以投，别把它当稳定盘。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "moonshot",
+    "name": "月之暗面",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 90,
+    "open": "已开放",
+    "city": "北京/上海",
+    "roles": [
+      "AI产品",
+      "开发者生态",
+      "API商业化"
+    ],
+    "url": "https://app.mokahr.com/su/PHQF7",
+    "rule": "穿越计划名额少，投递材料要写出AI产品判断。",
+    "reason": "Kimi/API/Agent 场景适合讲AI应用产品与评测闭环，门槛高但值得冲。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "zhipu",
+    "name": "智谱",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 89,
+    "open": "待确认",
+    "city": "北京",
+    "roles": [
+      "AI产品经理",
+      "Agent产品",
+      "大模型应用"
+    ],
+    "url": "https://app.mokahr.com/campus-recruitment/zphz/148984#/jobs",
+    "rule": "注意区分实习、校招、社招；Agent方向优先。",
+    "reason": "智谱的Agent和MaaS生态与你AI产品/评测经历贴合，尤其适合强调“标准、评测、闭环”。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "minimax",
+    "name": "MiniMax",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 88,
+    "open": "待确认",
+    "city": "北京/上海/深圳",
+    "roles": [
+      "AI产品",
+      "多模态产品",
+      "海外AI产品"
+    ],
+    "url": "https://www.minimaxi.com/careers",
+    "rule": "2027窗口需手动确认，重点盯产品/数据/运营类。",
+    "reason": "多模态和AI应用方向适合你，但公开岗位变化快，要每周看。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "stepfun",
+    "name": "阶跃星辰",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 86,
+    "open": "待确认",
+    "city": "上海/北京",
+    "roles": [
+      "大模型产品",
+      "多模态产品",
+      "平台产品"
+    ],
+    "url": "https://www.stepfun.com/career",
+    "rule": "官网岗位需手动确认，若无校招可走实习/社招实习。",
+    "reason": "多模态/大模型平台方向很对口，缺点是校招入口不一定稳定。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "01ai",
+    "name": "零一万物",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 84,
+    "open": "待确认",
+    "city": "北京/上海",
+    "roles": [
+      "AI应用产品",
+      "大模型平台",
+      "Agent产品"
+    ],
+    "url": "https://www.lingyiwanwu.com/",
+    "rule": "官网未必有完整校招页，建议同步搜公众号/招聘平台。",
+    "reason": "AI Native应用方向和你目标一致，但需要确认是否收27届PM。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "baichuan",
+    "name": "百川智能",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 83,
+    "open": "待确认",
+    "city": "北京",
+    "roles": [
+      "AI产品",
+      "大模型应用",
+      "数据产品"
+    ],
+    "url": "https://www.baichuan-ai.com/",
+    "rule": "优先找官方招聘入口或公众号。",
+    "reason": "医疗/助手/大模型应用均可包装你的评测经验，但岗位透明度较低。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "modelbest",
+    "name": "面壁智能",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 82,
+    "open": "待确认",
+    "city": "北京",
+    "roles": [
+      "端侧AI产品",
+      "Agent产品",
+      "大模型应用"
+    ],
+    "url": "https://www.modelbest.cn/",
+    "rule": "重点盯实习和校招补录。",
+    "reason": "端侧模型与Agent方向有想象力，适合作为AI独角兽补充盘。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "sensetime",
+    "name": "商汤科技",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 84,
+    "open": "已开放",
+    "city": "北京/上海/深圳/杭州",
+    "roles": [
+      "产品经理",
+      "大模型产品",
+      "计算机视觉产品"
+    ],
+    "url": "https://www.sensetime.com/cn/join-us",
+    "rule": "招满即止，产品岗要尽快点进去确认。",
+    "reason": "AI公司标签强，CV/多模态/大模型场景能接上你的多模态评测经历。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "iflytek",
+    "name": "科大讯飞",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 82,
+    "open": "待确认",
+    "city": "合肥/北京/上海/深圳",
+    "roles": [
+      "AI产品经理",
+      "教育AI产品",
+      "语音产品"
+    ],
+    "url": "https://campus.iflytek.com/official-pc/careers",
+    "rule": "AI语音/教育产品老牌，注意岗位城市和事业部。",
+    "reason": "教育AI、语音、多模态方向适合投，但要避免偏销售/解决方案岗。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "xiaohongshu",
+    "name": "小红书",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 82,
+    "open": "已开放",
+    "city": "北京/上海",
+    "roles": [
+      "推荐策略产品",
+      "AI产品",
+      "内容生态产品"
+    ],
+    "url": "https://job.xiaohongshu.com/campus/position",
+    "rule": "页面可能同时挂不同届次，必须确认27届。",
+    "reason": "内容生态+推荐评估能和你评测体系经验挂钩，但C端经验是短板。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "zhihu",
+    "name": "知乎",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 81,
+    "open": "已开放",
+    "city": "北京/成都",
+    "roles": [
+      "大模型数据运营",
+      "推荐策略产品",
+      "增长产品"
+    ],
+    "url": "https://app.mokahr.com/campus-recruitment/zhihu/68321#/jobs",
+    "rule": "大模型数据运营和推荐策略优先，商业增长谨慎。",
+    "reason": "你自整理清单里知乎大模型数据运营匹配分高，适合作为AI数据评测类强投。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "zuoyebang",
+    "name": "作业帮",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 80,
+    "open": "已开放",
+    "city": "北京",
+    "roles": [
+      "AI产品经理",
+      "平台产品经理",
+      "数据分析"
+    ],
+    "url": "https://app.mokahr.com/campus-recruitment/zuoyebang/39595#/jobs",
+    "rule": "同一时间仅可提交 1 个申请，别乱占坑。",
+    "reason": "AI产品经理岗位和提示词、标注、评测能力匹配，但教育/直播业务经验是短板。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "didi",
+    "name": "滴滴",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 79,
+    "open": "已开放",
+    "city": "北京/上海/深圳/杭州",
+    "roles": [
+      "AI客服产品",
+      "国际化出行策略",
+      "产品助理"
+    ],
+    "url": "https://campus.didiglobal.com/campus_apply/didiglobal/96064#/jobs",
+    "rule": "每人 3 次主动投递机会，优先AI客服和策略产品。",
+    "reason": "AI客服/策略产品能接上你的闭环迭代能力，其他运营类别乱投。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "kuaishou",
+    "name": "快手",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 78,
+    "open": "已开放",
+    "city": "北京/杭州/深圳",
+    "roles": [
+      "AI产品",
+      "推荐/内容产品",
+      "平台产品"
+    ],
+    "url": "https://campus.kuaishou.cn/recruit/campus/e/#/campus/job-list",
+    "rule": "岗位列表可能登录可见，先看快Star和产品类。",
+    "reason": "内容推荐和AI应用场景多，但岗位检索成本较高，放P2推进。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "netease",
+    "name": "网易",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 77,
+    "open": "已开放",
+    "city": "杭州/广州/北京/上海",
+    "roles": [
+      "AI产品",
+      "有道AI教育产品",
+      "平台产品"
+    ],
+    "url": "https://campus.163.com/app/summary/campus/list",
+    "rule": "游戏岗和互联网岗入口分开，有道方向值得看。",
+    "reason": "网易有道/AI教育产品适合投，游戏产品策划与你主线不贴。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "xiaomi",
+    "name": "小米",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 76,
+    "open": "已开放",
+    "city": "北京/上海/武汉/深圳/南京",
+    "roles": [
+      "AI产品",
+      "IoT产品",
+      "汽车智能产品"
+    ],
+    "url": "https://hr.xiaomi.com/campus",
+    "rule": "AI大模型、IoT、汽车智能方向优先。",
+    "reason": "硬件+AI场景可投，但你的过往偏数据评测，需要补用户/硬件场景理解。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "oppo",
+    "name": "OPPO",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 75,
+    "open": "已开放",
+    "city": "深圳/东莞/北京/上海",
+    "roles": [
+      "AI产品",
+      "手机系统产品",
+      "IoT产品"
+    ],
+    "url": "https://careers.oppo.com/university/oppo/campus",
+    "rule": "流程可能含AI面试，提前准备。",
+    "reason": "手机AI/端侧AI是好方向，但需要把你经历翻译成用户体验和端侧智能能力。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "vivo",
+    "name": "vivo",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 73,
+    "open": "待确认",
+    "city": "深圳/东莞/南京/杭州",
+    "roles": [
+      "AI产品",
+      "系统产品",
+      "用户体验产品"
+    ],
+    "url": "https://hr.vivo.com/wt/vivo/web/index/campus",
+    "rule": "确认27届校招开放后再投。",
+    "reason": "端侧AI产品可关注，但不是你第一优势区。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "lenovo",
+    "name": "联想",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 72,
+    "open": "已开放",
+    "city": "北京/上海/深圳/武汉",
+    "roles": [
+      "AI PC产品",
+      "智能设备产品",
+      "平台产品"
+    ],
+    "url": "https://talent.lenovo.com.cn/campus",
+    "rule": "AI PC和企业AI方向优先。",
+    "reason": "AI PC是新叙事，可投产品与销售/方案中偏产品的岗位。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "ant",
+    "name": "蚂蚁集团",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 76,
+    "open": "待确认",
+    "city": "杭州/上海/北京",
+    "roles": [
+      "AI产品",
+      "金融科技产品",
+      "平台产品"
+    ],
+    "url": "https://talent.antgroup.com/campus-position",
+    "rule": "金融风控/支付产品要谨慎，AI平台方向优先。",
+    "reason": "平台产品训练强，但金融业务经验不足，适合作为P2强补。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "taotian",
+    "name": "淘天集团",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 75,
+    "open": "已开放",
+    "city": "杭州/北京/上海",
+    "roles": [
+      "产品经理",
+      "AIGC产品",
+      "商家/供给产品"
+    ],
+    "url": "https://talent.taotian.com/campus",
+    "rule": "阿里系投递池可能冲突，和阿里集团择优。",
+    "reason": "电商AI和供给产品可投，但不如AI评测/平台方向贴合。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "pdd",
+    "name": "拼多多",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 72,
+    "open": "待确认",
+    "city": "上海/深圳/广州",
+    "roles": [
+      "产品管培",
+      "数据产品",
+      "平台产品"
+    ],
+    "url": "https://careers.pddglobalrecruit.com/campus",
+    "rule": "强业务强压力，岗位方向确认后再决定。",
+    "reason": "产品训练强，但AI PM 对口度不确定，放观察强投之间。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "bilibili",
+    "name": "B站",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 70,
+    "open": "已开放",
+    "city": "上海/北京/深圳",
+    "roles": [
+      "视频生成评测",
+      "多模态数据智能",
+      "内容产品"
+    ],
+    "url": "https://jobs.bilibili.com/campus/positions",
+    "rule": "招满即止；算法岗别硬投，找评测/数据/产品运营。",
+    "reason": "多模态内容和视频评测有一定适配，但公开岗位多偏技术。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "ctrip",
+    "name": "携程",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 69,
+    "open": "已开放",
+    "city": "上海/北京",
+    "roles": [
+      "AI产品实习生",
+      "AIGC产品",
+      "旅行产品"
+    ],
+    "url": "https://campus.ctrip.com/campus-recruitment/ctrip/119594#/jobs",
+    "rule": "目前偏实习，正式校招待看。",
+    "reason": "AIGC旅行应用可以投，但旅行业务不是你的主场。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "intsig",
+    "name": "合合信息",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 78,
+    "open": "已开放",
+    "city": "上海",
+    "roles": [
+      "AI产品经理",
+      "文档智能产品",
+      "OCR产品"
+    ],
+    "url": "https://www.intsig.com/cn/career",
+    "rule": "重点找OCR/文档智能/AI产品。",
+    "reason": "你做过OCR/VLM多语种评测，和合合的文档智能非常好讲。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "infini",
+    "name": "无问芯穹",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 74,
+    "open": "已开放",
+    "city": "北京/上海",
+    "roles": [
+      "产品经理",
+      "AI Infra产品",
+      "算力平台产品"
+    ],
+    "url": "https://www.infini-ai.com/",
+    "rule": "入口可能在官网/公众号，先手动确认岗位。",
+    "reason": "AI Infra方向可用你训练数据链路经验切入，但偏平台技术。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "anker",
+    "name": "安克创新",
+    "type": "云与ICT",
+    "priority": "P3",
+    "score": 65,
+    "open": "待确认",
+    "city": "深圳/长沙/海外",
+    "roles": [
+      "AI硬件产品",
+      "消费电子产品",
+      "用户研究"
+    ],
+    "url": "https://campus.anker.com/",
+    "rule": "硬件消费电子为主，AI PM不是主线。",
+    "reason": "品牌和产品训练不错，但和你的大模型数据评测主线较远。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "transsion",
+    "name": "传音控股",
+    "type": "云与ICT",
+    "priority": "P3",
+    "score": 64,
+    "open": "已开放",
+    "city": "深圳/上海/重庆",
+    "roles": [
+      "AI产品类",
+      "海外产品",
+      "影像AI"
+    ],
+    "url": "https://campus.transsion.com/",
+    "rule": "TAIG-AI可能硕士及以上，本科先确认普通批。",
+    "reason": "海外AI产品有机会，但学历/方向门槛需要确认。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "zte",
+    "name": "中兴通讯",
+    "type": "云与ICT",
+    "priority": "P3",
+    "score": 62,
+    "open": "已开放",
+    "city": "深圳/南京/上海/西安",
+    "roles": [
+      "产品经理",
+      "技术营销",
+      "解决方案"
+    ],
+    "url": "https://job.zte.com.cn/",
+    "rule": "未来领军通常门槛高，普通产品岗另找。",
+    "reason": "ICT产品可兜底，但你AI PM主线不应过早消耗精力。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "h3c",
+    "name": "新华三",
+    "type": "云与ICT",
+    "priority": "P3",
+    "score": 61,
+    "open": "已开放",
+    "city": "杭州/北京/合肥/成都",
+    "roles": [
+      "产品经理",
+      "云产品",
+      "网络安全产品"
+    ],
+    "url": "https://career.h3c.com/campus",
+    "rule": "云/安全/AI平台方向优先。",
+    "reason": "平台产品可投，但行业吸引力和AI主线稍弱。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "ctyun",
+    "name": "天翼云",
+    "type": "云与ICT",
+    "priority": "P3",
+    "score": 60,
+    "open": "已开放",
+    "city": "北京/上海/广州/深圳/成都",
+    "roles": [
+      "云产品经理",
+      "AI平台产品",
+      "解决方案"
+    ],
+    "url": "https://ctyun.hotjob.cn",
+    "rule": "国企云流程慢，作为稳定兜底。",
+    "reason": "云平台产品能兜底，但节奏和成长曲线不一定最适合你。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "mihoyo",
+    "name": "米哈游",
+    "type": "互联网/AI应用",
+    "priority": "P3",
+    "score": 58,
+    "open": "已开放",
+    "city": "上海/北京",
+    "roles": [
+      "产品策划",
+      "AI内容工具",
+      "数据分析"
+    ],
+    "url": "https://campus.mihoyo.com/",
+    "rule": "游戏策划为主，不要硬凑AI PM。",
+    "reason": "除非出现AI工具/内容生产产品，否则不建议占太多时间。",
+    "deadline": null,
+    "evidenceUrl": "",
+    "education": "",
+    "sourceNotes": ""
+  },
+  {
+    "id": "new-b6c70a151df4",
+    "name": "贝壳找房",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 94,
+    "open": "招满即止",
+    "city": "北京",
+    "roles": [
+      "AI产品经理（AI生态设计方向）"
+    ],
+    "url": "https://campus.ke.com/campus/jobs",
+    "rule": "官网岗位持续更新，建议优先投AI产品方向",
+    "reason": "岗位直接要求AI工具探索、需求调研、原型设计和效果优化，与AI产品实习高度贴合",
+    "deadline": null,
+    "evidenceUrl": "https://www.nowcoder.com/jobs/hr/627",
+    "education": "本科可投",
+    "sourceNotes": "第三方实时职位页显示2027届AI产品经理在招；投递前在官网复核岗位ID"
+  },
+  {
+    "id": "new-5c0d891ca691",
+    "name": "搜狐集团",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 84,
+    "open": "招满即止",
+    "city": "北京/天津",
+    "roles": [
+      "AI全栈研发/大模型算法/产品运营"
+    ],
+    "url": "https://app.mokahr.com/m/campus_apply/sohu/36036",
+    "rule": "每人可投2个岗位",
+    "reason": "AI人才专项与产品运营并行，适合AI产品背景向AI应用或运营延展",
+    "deadline": null,
+    "evidenceUrl": "https://jy.cumtb.edu.cn/Zhaopin/xiaozhao.html?id=a981d818-519a-6333-8e05-e3658d5b1047&type=1",
+    "education": "待确认",
+    "sourceNotes": "面向2026/2027届；具体岗位学历以官网为准"
+  },
+  {
+    "id": "new-9a176eada56b",
+    "name": "新浪&微博",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 86,
+    "open": "招满即止",
+    "city": "北京",
+    "roles": [
+      "产品管培生/AI应用平台开发"
+    ],
+    "url": "https://app.mokahr.com/social-recruitment/sina/43535?locale=zh-CN#/",
+    "rule": "官网/公众号投递；实习满3个月有专属通道",
+    "reason": "产品管培与AI应用平台方向兼具，可发挥产品与计算机复合背景",
+    "deadline": null,
+    "evidenceUrl": "https://career.buaa.edu.cn/frontpage/buaa/html/recruitmentinfoForm.html?positionDetailId=09febb3a2fc044c9b0f6802cc3e440b1",
+    "education": "待确认",
+    "sourceNotes": "面向2027届，具体岗位学历需逐岗核验"
+  },
+  {
+    "id": "new-7683ea90aa3b",
+    "name": "得物App",
+    "type": "互联网/AI应用",
+    "priority": "P1",
+    "score": 87,
+    "open": "招满即止",
+    "city": "上海/杭州",
+    "roles": [
+      "用户产品经理/策略产品经理/客服体验产品经理"
+    ],
+    "url": "https://campus.dewu.com/578078/m/position/",
+    "rule": "官网选择2027届秋季校园招聘项目",
+    "reason": "多类产品和体验策略岗位开放，适合产品实习与数据分析能力",
+    "deadline": null,
+    "evidenceUrl": "https://campus.dewu.com/578078/m/position/",
+    "education": "待确认",
+    "sourceNotes": "官方页面标记多岗位热招；逐岗确认学历"
+  },
+  {
+    "id": "new-6c4164f17c50",
+    "name": "360集团",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 76,
+    "open": "招满即止",
+    "city": "北京/上海/深圳/西安",
+    "roles": [
+      "AI/算法/安全/产品运营相关岗位"
+    ],
+    "url": "https://campus.360.cn/",
+    "rule": "岗位持续上新，官网投递",
+    "reason": "AI与安全场景丰富，计算机背景匹配",
+    "deadline": null,
+    "evidenceUrl": "https://www.nowcoder.com/feed/main/detail/42a3e324f9dd4b11a5436b22a42528bf",
+    "education": "待确认",
+    "sourceNotes": "当前线索为员工内推页，必须在官方校园招聘站复核具体岗位"
+  },
+  {
+    "id": "new-fa80d50d6418",
+    "name": "顺丰科技",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 92,
+    "open": "招满即止",
+    "city": "深圳/武汉/成都",
+    "roles": [
+      "产品经理/数据产品经理/AI开发"
+    ],
+    "url": "https://campus.sf-express.com/#/homePage",
+    "rule": "官网投递；部分岗位有笔试",
+    "reason": "产品、数据产品与大模型/大数据岗位齐全，智慧物流AI落地场景强",
+    "deadline": null,
+    "evidenceUrl": "https://career.buaa.edu.cn/frontpage/buaa/html/recruitmentinfoForm.html?positionDetailId=ac4cc5658ff4400cad1dde1d74772b28",
+    "education": "本科可投",
+    "sourceNotes": "2027届全球毕业生，已开始测评和面试"
+  },
+  {
+    "id": "new-5a0fd3598d7f",
+    "name": "多点数智",
+    "type": "互联网/AI应用",
+    "priority": "P0",
+    "score": 96,
+    "open": "招满即止",
+    "city": "北京/武汉/成都",
+    "roles": [
+      "AI产品经理/FDE/AIoT产品运营"
+    ],
+    "url": "https://duodian.jobs.feishu.cn/2027",
+    "rule": "每人限投2个岗位",
+    "reason": "明确招聘AI产品经理、FDE和AIoT运营，和目标方向高度一致",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/mobile/dist/index.html#/recruitmentinfoForm?positionDetailId=67fdf37850a64c6c80be8f8abfd8b53b",
+    "education": "本科可投",
+    "sourceNotes": "毕业时间2026-08至2027-07；10月下旬起初试"
+  },
+  {
+    "id": "new-941c1236b4c4",
+    "name": "唯品会",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 73,
+    "open": "deadline明确",
+    "city": "广州/深圳",
+    "roles": [
+      "产品/数据/技术类校招岗位"
+    ],
+    "url": "https://campus.vip.com/",
+    "rule": "官方校招站投递",
+    "reason": "电商产品和数据场景可承接产品能力",
+    "deadline": "2026-10-30",
+    "evidenceUrl": "https://career.cuhk.edu.cn/en/job/search?domain=careercuhk&nature=150005%2C150006%2C150007%2C150010%2C150013%2C150015%2C150016%2C150017&page=5&title_type=1",
+    "education": "待确认",
+    "sourceNotes": "高校就业平台显示当前开放，逐岗确认学历"
+  },
+  {
+    "id": "new-4aa0e523d76f",
+    "name": "虎牙",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 72,
+    "open": "deadline明确",
+    "city": "广州",
+    "roles": [
+      "产品/运营/技术类校招岗位"
+    ],
+    "url": "https://hr.huya.com/",
+    "rule": "官方招聘站投递",
+    "reason": "直播内容产品、策略运营和推荐场景可迁移AI产品经验",
+    "deadline": "2026-10-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/en/job/search?domain=careercuhk&nature=150005%2C150006%2C150007%2C150010%2C150013%2C150015%2C150016%2C150017&page=5&title_type=1",
+    "education": "待确认",
+    "sourceNotes": "就业平台显示全职校招开放，逐岗复核"
+  },
+  {
+    "id": "new-4af38e3fb268",
+    "name": "保利和润",
+    "type": "互联网/AI应用",
+    "priority": "P2",
+    "score": 78,
+    "open": "deadline明确",
+    "city": "全国",
+    "roles": [
+      "AI产品经理/AI算法工程师"
+    ],
+    "url": "https://polyharmony.zhiye.com/",
+    "rule": "官网网申+测评",
+    "reason": "央企子公司的AI产品岗位，兼顾AI方向与央企保底",
+    "deadline": "2026-11-06 24:00",
+    "evidenceUrl": "https://jy.scu.edu.cn/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4Y5aKk7a2sobddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+    "education": "本科可投",
+    "sourceNotes": "面向2027届本科及以上"
+  },
+  {
+    "id": "new-417e6c9c7490",
+    "name": "彩讯科技",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 97,
+    "open": "招满即止",
+    "city": "北京/广州/深圳/成都/杭州",
+    "roles": [
+      "AI产品经理（大模型/智能体）"
+    ],
+    "url": "https://richinfo.zhiye.com/campus",
+    "rule": "按官网职位投递，建议提交PRD/原型/AI项目作品",
+    "reason": "职责直接覆盖Agent能力设计、知识库、Benchmark、Badcase和Prompt优化",
+    "deadline": null,
+    "evidenceUrl": "https://job.xidian.edu.cn/campus/view/id/757481",
+    "education": "本科可投",
+    "sourceNotes": "明确偏好知识库、评测运营、Prompt/Benchmark/Badcase经验"
+  },
+  {
+    "id": "new-bf742f96c77c",
+    "name": "卡奥斯COSMOPlat",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 93,
+    "open": "招满即止",
+    "city": "青岛/北京/上海",
+    "roles": [
+      "AI产品经理/工业软件产品经理/FDE"
+    ],
+    "url": "https://maker.haier.net/client/campus/customizedptjobs/id/87.html",
+    "rule": "海尔招聘官网选择卡奥斯产业",
+    "reason": "工业大模型与智能体落地，产品及FDE都高度匹配",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/recruitmentinfoForm.html?positionDetailId=776f39119fd24876af67287b47e52dab",
+    "education": "本科可投",
+    "sourceNotes": "岗位持续上新"
+  },
+  {
+    "id": "new-ceb3cbbdf7d1",
+    "name": "易点云",
+    "type": "ToB软件/SaaS",
+    "priority": "P2",
+    "score": 75,
+    "open": "招满即止",
+    "city": "北京",
+    "roles": [
+      "产品经理/商业创新/研发技术"
+    ],
+    "url": "https://ed-easy.zhiye.com/campus",
+    "rule": "官网或公众号投递",
+    "reason": "办公IT订阅和企业数字化，适合B端产品路线",
+    "deadline": null,
+    "evidenceUrl": "https://gdc.stu.edu.cn/Article/ArticleDetail/7193",
+    "education": "本科可投",
+    "sourceNotes": "2027届本科、硕士，专业不限"
+  },
+  {
+    "id": "new-ede5f89b69f1",
+    "name": "北森云计算",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 92,
+    "open": "招满即止",
+    "city": "北京/成都/西安/大连",
+    "roles": [
+      "软件产品经理/测评产品经理"
+    ],
+    "url": "https://beisen.zhiye.com/campus/jobs",
+    "rule": "投递简历→AI面试+测评→1-2轮面试",
+    "reason": "AI HR与测评产品兼具，AI产品实习和评测治理目标都可对接",
+    "deadline": null,
+    "evidenceUrl": "https://beisen.zhiye.com/jobs?LocId=%5B%7B%22id%22%3A%225101%22%2C%22label%22%3A%22%E6%88%90%E9%83%BD%E5%B8%82%22%7D%5D",
+    "education": "本科可投",
+    "sourceNotes": "官方职位页显示2027届软件产品经理在招"
+  },
+  {
+    "id": "new-33579543fe04",
+    "name": "金蝶",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 95,
+    "open": "招满即止",
+    "city": "深圳/上海/南京/北京/长沙/厦门等",
+    "roles": [
+      "AI产品经理/Agent开发/产品经理管培生"
+    ],
+    "url": "https://app.mokahr.com/campus-recruitment/kingdeehr/166565?locale=zh-CN",
+    "rule": "网申→笔试→初试→测评→复试",
+    "reason": "企业AI、Agent和产品岗位直接匹配AI产品目标",
+    "deadline": null,
+    "evidenceUrl": "https://job.tiangong.edu.cn/correcruit/content/id/56018.html",
+    "education": "本科可投",
+    "sourceNotes": "面向2027届，毕业时间2026-10-01至2027-09-30"
+  },
+  {
+    "id": "new-ebea68bf5af1",
+    "name": "帆软软件",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 91,
+    "open": "招满即止",
+    "city": "南京/杭州/无锡/成都",
+    "roles": [
+      "产品经理/产品运营/Agent研发"
+    ],
+    "url": "https://join.fanruan.com/",
+    "rule": "官网投递，产品岗位与Agent岗位分开申请",
+    "reason": "BI数据产品与Agent研发均适合计算机+产品复合背景",
+    "deadline": null,
+    "evidenceUrl": "https://scdc.jnu.edu.cn/teachin/view/id/193026",
+    "education": "待确认",
+    "sourceNotes": "招聘简章列产品经理、产品运营和Agent研发；逐岗核验学历"
+  },
+  {
+    "id": "new-e7f6c683dce0",
+    "name": "用友网络",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 90,
+    "open": "招满即止",
+    "city": "北京",
+    "roles": [
+      "B端产品经理"
+    ],
+    "url": "https://career.yonyou.com",
+    "rule": "官网投递",
+    "reason": "明确要求产品实习、需求抽象、建模和跨团队推进，画像高度匹配",
+    "deadline": null,
+    "evidenceUrl": "https://career.bnu.edu.cn/frontpage/bnu/html/recruitmentFairForm.html?id=6a0edb8dda1e4a86bef4c49e7bdbb4ab",
+    "education": "本科可投",
+    "sourceNotes": "统招本科及以上，企业级AI与ERP场景"
+  },
+  {
+    "id": "new-b2749847f14a",
+    "name": "神州信息",
+    "type": "ToB软件/SaaS",
+    "priority": "P0",
+    "score": 94,
+    "open": "deadline明确",
+    "city": "北京/西安/上海/广州/成都等",
+    "roles": [
+      "AI Agent咨询设计工程师/数据模型师/业务分析师"
+    ],
+    "url": "https://dcits.zhiye.com/campus",
+    "rule": "每人只能申请1个职位",
+    "reason": "AI咨询设计和金融科技场景兼顾产品、Agent与数据方向",
+    "deadline": "2026-12-30",
+    "evidenceUrl": "https://career.ahnu.edu.cn/info/1008/34452.htm",
+    "education": "本科可投",
+    "sourceNotes": "AI Agent咨询设计岗位官方职位需再次核验当日状态"
+  },
+  {
+    "id": "new-f103426c79fb",
+    "name": "东软集团",
+    "type": "ToB软件/SaaS",
+    "priority": "P2",
+    "score": 79,
+    "open": "deadline明确",
+    "city": "沈阳/大连/北京/上海/武汉等",
+    "roles": [
+      "咨询顾问/开发测试/AI应用相关"
+    ],
+    "url": "https://neusoft-campus.zhiye.com/",
+    "rule": "官网投递；研发算法多要求硕士，开发测试本科可投",
+    "reason": "医疗、汽车、医保、智慧城市均有大模型或智能体落地场景",
+    "deadline": "2026-11-28",
+    "evidenceUrl": "https://myjob.dlmu.edu.cn/campus/view/id/868559",
+    "education": "本科可投（开发测试/部分咨询）",
+    "sourceNotes": "AI技术管培生多为硕士，勿误投"
+  },
+  {
+    "id": "new-217712ba1716",
+    "name": "地平线",
+    "type": "汽车智能化",
+    "priority": "P1",
+    "score": 85,
+    "open": "deadline明确",
+    "city": "北京/上海/南京/杭州/成都/西安/深圳",
+    "roles": [
+      "测试/业务拓展/软件/算法产品相关"
+    ],
+    "url": "https://horizon-campus.hotjob.cn/",
+    "rule": "官网选择校园招聘",
+    "reason": "智能驾驶与机器人、物理AI赛道，适合产品或测试治理方向",
+    "deadline": "2026-10-30",
+    "evidenceUrl": "https://scc.pku.edu.cn/frontpage/pku/html/recruitmentFairForm.html?id=378585703a1d47b3ab07ddce67bcd9a1",
+    "education": "待确认",
+    "sourceNotes": "2026-09-01至2027-08-31毕业生；逐岗核验本科门槛"
+  },
+  {
+    "id": "new-46ef3cf890a9",
+    "name": "Momenta",
+    "type": "汽车智能化",
+    "priority": "P1",
+    "score": 82,
+    "open": "deadline明确",
+    "city": "苏州/上海/北京",
+    "roles": [
+      "自动驾驶产品/数据/测试相关岗位"
+    ],
+    "url": "https://momenta.jobs.feishu.cn/campus",
+    "rule": "官网校招投递",
+    "reason": "数据闭环和自动驾驶产品场景适合评测治理与数据方向",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "高校就业平台确认全职、本科及以上和截止日期；具体职位逐岗复核"
+  },
+  {
+    "id": "new-a5dfa630e615",
+    "name": "文远知行WeRide",
+    "type": "汽车智能化",
+    "priority": "P1",
+    "score": 83,
+    "open": "deadline明确",
+    "city": "广州/北京/上海/深圳",
+    "roles": [
+      "自动驾驶产品/运营/测试/数据相关岗位"
+    ],
+    "url": "https://weride.jobs.feishu.cn/campus",
+    "rule": "官网校招投递",
+    "reason": "Robotaxi等产品运营、数据闭环和测试场景与目标相邻",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "逐岗核验是否开放产品/数据岗"
+  },
+  {
+    "id": "new-01bc587b67db",
+    "name": "理想汽车",
+    "type": "汽车智能化",
+    "priority": "P0",
+    "score": 95,
+    "open": "招满即止",
+    "city": "北京/上海/常州/杭州",
+    "roles": [
+      "AI产品经理/AI解决方案工程师"
+    ],
+    "url": "https://jobs.lixiang.com/campus",
+    "rule": "官网选择2027校园招聘",
+    "reason": "官方职位明确AI产品经理，且具身智能战略与Agent产品高度相关",
+    "deadline": null,
+    "evidenceUrl": "https://li.jobs.feishu.cn/referral/campus/m/position/share/?token=NTsxNjg5NzY1ODYzOTEzOzcyNTM5NDM0MzI5MDAwMTgxNzk7NzI1NzQ3OTM4NDE5NzY0NjYzMQ",
+    "education": "待确认",
+    "sourceNotes": "职位列表显示AI产品经理在招；进入详情复核学历"
+  },
+  {
+    "id": "new-eda8ba920b04",
+    "name": "小鹏集团",
+    "type": "汽车智能化",
+    "priority": "P0",
+    "score": 91,
+    "open": "招满即止",
+    "city": "广州/深圳/上海/北京/武汉",
+    "roles": [
+      "AI应用/智能机器人/产品相关岗位"
+    ],
+    "url": "https://xiaopeng.jobs.feishu.cn/campus/",
+    "rule": "选择探索者计划投递",
+    "reason": "物理AI、企业级AI应用和机器人三条线与目标高度相关",
+    "deadline": null,
+    "evidenceUrl": "https://jyzx.scut.edu.cn/xjhxq/list.htm?id=a93e506b98ad482cb6e1ad439397d795",
+    "education": "本科可投",
+    "sourceNotes": "面向2026-09至2027-08毕业生，300+方向"
+  },
+  {
+    "id": "new-edb9cbd14e21",
+    "name": "蔚来",
+    "type": "汽车智能化",
+    "priority": "P0",
+    "score": 90,
+    "open": "deadline明确",
+    "city": "上海/合肥/北京",
+    "roles": [
+      "AI产品/领域应用产品/数字技术"
+    ],
+    "url": "https://nio.jobs.feishu.cn/campus/",
+    "rule": "官网投递校招职位",
+    "reason": "已有AI产品、AI应用和数据治理岗位体系，智能座舱AI场景强",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://tj91.tongji.edu.cn/frontpage/tongji/html/newsDetail.html?id=56f41107f83b4e59a38753ce7f1bad2d",
+    "education": "本科可投",
+    "sourceNotes": "正式校招项目需与实习项目区分"
+  },
+  {
+    "id": "new-3920d597576a",
+    "name": "零跑汽车",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 78,
+    "open": "招满即止",
+    "city": "杭州",
+    "roles": [
+      "IT/软件/算法/智能制造数字化岗位"
+    ],
+    "url": "https://leapmotor.zhiye.com/campus",
+    "rule": "3次投递机会",
+    "reason": "全域自研与车联网云计算场景，适合IT产品或数据方向",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/recruitmentFairForm.html?id=26100362da4e43a298740590756712ee",
+    "education": "本科可投",
+    "sourceNotes": "2026-11至2027-10毕业生"
+  },
+  {
+    "id": "new-38253481541d",
+    "name": "吉利控股集团",
+    "type": "汽车智能化",
+    "priority": "P1",
+    "score": 84,
+    "open": "招满即止",
+    "city": "杭州/宁波/上海等",
+    "roles": [
+      "Robotaxi策略运营/AI相关产品与运营"
+    ],
+    "url": "https://campus.geely.com/",
+    "rule": "集团官网选择具体子公司与岗位",
+    "reason": "Robotaxi策略运营强调数据分析、规则机制和产品策略迭代",
+    "deadline": null,
+    "evidenceUrl": "https://campus.geely.com/m/campus-recruitment/geely/78436#/jobs?zhineng[0]=131986",
+    "education": "本科可投",
+    "sourceNotes": "官方职位页显示相关岗位急招"
+  },
+  {
+    "id": "new-ef65a7ca416e",
+    "name": "长安汽车",
+    "type": "汽车智能化",
+    "priority": "P1",
+    "score": 82,
+    "open": "招满即止",
+    "city": "重庆",
+    "roles": [
+      "数字化技术/数据运营/软件项目管理"
+    ],
+    "url": "http://changan.zhiye.com/Campus",
+    "rule": "官网投递",
+    "reason": "数字化技术含数据运营、算法、云平台和软件项目管理",
+    "deadline": null,
+    "evidenceUrl": "https://scc.cau.edu.cn/frontpage/cau/html/recruitmentinfoForm.html?positionDetailId=a2c008e4b862423a98d998a0bf1ed1a2",
+    "education": "本科可投",
+    "sourceNotes": "要求本科及以上，部分岗位要求英语能力"
+  },
+  {
+    "id": "new-b80d741b0e50",
+    "name": "中国一汽",
+    "type": "汽车智能化",
+    "priority": "P0",
+    "score": 92,
+    "open": "招满即止",
+    "city": "长春/北京等",
+    "roles": [
+      "业务架构工程师（汽车营销智能体）/智能驾驶产品经理"
+    ],
+    "url": "http://zhaopin.faw.com.cn",
+    "rule": "每个企业只能选择1个岗位，可投多个集团企业",
+    "reason": "岗位直接做业务智能体产品规划、流程编排、交互迭代和效果复盘",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/recruitmentFairForm.html?id=aa0f48f9554146de804cb8804c580448",
+    "education": "本科可投",
+    "sourceNotes": "业务架构岗位需求少，需尽快投"
+  },
+  {
+    "id": "new-ff594893cead",
+    "name": "比亚迪",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 77,
+    "open": "deadline明确",
+    "city": "深圳/西安/合肥等",
+    "roles": [
+      "IT/数字化/产品与技术相关岗位"
+    ],
+    "url": "https://job.byd.com/",
+    "rule": "官方招聘站投递",
+    "reason": "大型智能制造和汽车数字化场景，适合作为技术产品保底",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "逐岗筛选IT、数据、产品方向"
+  },
+  {
+    "id": "new-2830d0f7a569",
+    "name": "广汽集团",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 77,
+    "open": "deadline明确",
+    "city": "广州",
+    "roles": [
+      "数智化/智能网联/产品相关岗位"
+    ],
+    "url": "https://campus.gac.com.cn/",
+    "rule": "集团校招官网投递",
+    "reason": "汽车智能化与央企背景兼具，适合保底",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "逐岗确认产品或数字化岗位"
+  },
+  {
+    "id": "new-5a6063f6f006",
+    "name": "黑芝麻智能",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 69,
+    "open": "招满即止",
+    "city": "上海/成都/武汉/深圳",
+    "roles": [
+      "座舱应用/AI工具链/模型推理"
+    ],
+    "url": "https://bsthr.zhiye.com/",
+    "rule": "官网或官方公众号投递",
+    "reason": "端侧AI和座舱场景相关，但多数核心技术岗偏硕士",
+    "deadline": null,
+    "evidenceUrl": "https://jiuye.uestc.edu.cn/career/recruitment/onsite/fxovp60t9xq9",
+    "education": "待确认",
+    "sourceNotes": "高校职位表显示多数岗位硕士，需查找本科可投的软件岗位"
+  },
+  {
+    "id": "new-deb24072fbf6",
+    "name": "RoboSense速腾聚创",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 76,
+    "open": "deadline明确",
+    "city": "深圳/上海",
+    "roles": [
+      "产品/数据/测试/机器人感知相关岗位"
+    ],
+    "url": "https://robosense.zhiye.com/campus",
+    "rule": "官网投递",
+    "reason": "激光雷达与机器人感知兼具，适合产品或数据测试路线",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "逐岗核验目标岗位"
+  },
+  {
+    "id": "new-763b08a42df2",
+    "name": "锐明技术",
+    "type": "汽车智能化",
+    "priority": "P2",
+    "score": 73,
+    "open": "deadline明确",
+    "city": "深圳",
+    "roles": [
+      "AIoT/车载产品/数据相关岗位"
+    ],
+    "url": "https://streamax.zhiye.com/campus",
+    "rule": "官网投递",
+    "reason": "商用车AIoT与海外业务场景适合技术产品方向",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "开放国际学生，具体岗位逐岗核验"
+  },
+  {
+    "id": "new-9ab84bf19b69",
+    "name": "联友科技",
+    "type": "汽车智能化",
+    "priority": "P0",
+    "score": 89,
+    "open": "招满即止",
+    "city": "广州/武汉/深圳",
+    "roles": [
+      "数据与AI/产品设计/业务设计"
+    ],
+    "url": "https://szly.zhiye.com/campus",
+    "rule": "官网或微信公众号投递",
+    "reason": "汽车数字化公司的数据AI与产品设计岗位同时开放，产品匹配度高",
+    "deadline": null,
+    "evidenceUrl": "https://www.sohu.com/a/1072237903_121124318",
+    "education": "本科可投",
+    "sourceNotes": "毕业时间2026-09至2027-07；第三方汇编线索，须在官网复核"
+  },
+  {
+    "id": "new-f5ea99ee1433",
+    "name": "宇树科技",
+    "type": "机器人/具身智能",
+    "priority": "P1",
+    "score": 84,
+    "open": "招满即止",
+    "city": "杭州/上海/北京",
+    "roles": [
+      "AI/具身智能/AI Infra/技术支持"
+    ],
+    "url": "https://unitree.zhiye.com",
+    "rule": "官网投递",
+    "reason": "具身智能头部公司，可投具身数据、产品支持或AI相关方向",
+    "deadline": null,
+    "evidenceUrl": "https://job.ustb.edu.cn/frontpage/ustb/html/recruitmentFairForm.html?id=47a24603245543b3bc04e892e9f33780",
+    "education": "本科可投",
+    "sourceNotes": "招聘宣讲显示本科、硕士、博士均可"
+  },
+  {
+    "id": "new-15d60eb8f4b8",
+    "name": "优必选科技",
+    "type": "机器人/具身智能",
+    "priority": "P0",
+    "score": 90,
+    "open": "deadline明确",
+    "city": "深圳/北京",
+    "roles": [
+      "具身数据工程师/产品与项目类"
+    ],
+    "url": "https://ubtrobot.zhiye.com/campus",
+    "rule": "官网投递，部分研发岗笔试",
+    "reason": "具身数据与机器人产品化场景高度贴合大模型数据和评测治理目标",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://job.ncepu.edu.cn/zpgg/0afd7689be8d43d3b4a434216b72a6a7.htm",
+    "education": "本科可投",
+    "sourceNotes": "职位总表本科可投，具体算法研究岗可能有更高门槛"
+  },
+  {
+    "id": "new-8b4d5c0f527f",
+    "name": "埃夫特机器人",
+    "type": "机器人/具身智能",
+    "priority": "P1",
+    "score": 84,
+    "open": "招满即止",
+    "city": "芜湖/上海/杭州",
+    "roles": [
+      "具身数据治理/软件测试/IT工程师"
+    ],
+    "url": "https://efort.zhiye.com/campus",
+    "rule": "官网或微信公众号投递",
+    "reason": "具身数据治理与软件测试直接连接数据质量和评测治理",
+    "deadline": null,
+    "evidenceUrl": "https://scc.whut.edu.cn/#/preachMeeting/793515df-cdac-8529-63d8-db1c48f0de46/1",
+    "education": "本科可投",
+    "sourceNotes": "面向2027届全球应届本硕博"
+  },
+  {
+    "id": "new-71734eb0e5f7",
+    "name": "星猿哲科技",
+    "type": "机器人/具身智能",
+    "priority": "P1",
+    "score": 82,
+    "open": "招满即止",
+    "city": "上海",
+    "roles": [
+      "具身智能系统工程师"
+    ],
+    "url": "https://www.xyzrobotics.com/careers",
+    "rule": "按职位页投递并参加笔面试",
+    "reason": "包含数据飞轮、模型评测、产品化交付和客户培训，适合复合型路线",
+    "deadline": null,
+    "evidenceUrl": "https://sztu.bysjy.com.cn/detail/job?id=3236240&online_id=3600911",
+    "education": "本科可投",
+    "sourceNotes": "要求C++/Python，偏技术，适合作为FDE型岗位"
+  },
+  {
+    "id": "new-e953f382c78f",
+    "name": "千觉机器人",
+    "type": "机器人/具身智能",
+    "priority": "P1",
+    "score": 81,
+    "open": "招满即止",
+    "city": "上海",
+    "roles": [
+      "软件测试/数据与模型相关岗位"
+    ],
+    "url": "http://www.xensebot.com/",
+    "rule": "按官方校招简章渠道投递",
+    "reason": "触觉数据、VTLA模型和测试闭环适合数据质量与评测治理",
+    "deadline": null,
+    "evidenceUrl": "http://job.hust.edu.cn/zpinfo1/2413312.htm",
+    "education": "本科可投",
+    "sourceNotes": "证据明确软件测试岗位本科及以上；官网入口需从公告内获取"
+  },
+  {
+    "id": "new-ea73244c67ff",
+    "name": "中联重科（中科云谷）",
+    "type": "机器人/具身智能",
+    "priority": "P1",
+    "score": 83,
+    "open": "招满即止",
+    "city": "长沙",
+    "roles": [
+      "机器人研发/具身智能与AI算法/工业设计"
+    ],
+    "url": "https://campus.zoomlion.com/",
+    "rule": "限投1个岗位",
+    "reason": "真实工业场景、数据采集和具身训练平台，且央企属性稳健",
+    "deadline": null,
+    "evidenceUrl": "https://scc.hnu.edu.cn/detail/career?id=719641",
+    "education": "本科可投",
+    "sourceNotes": "2026-10至2027-09毕业生"
+  },
+  {
+    "id": "new-a5610fc00c4d",
+    "name": "陕西镐天具身智能",
+    "type": "机器人/具身智能",
+    "priority": "P2",
+    "score": 72,
+    "open": "招满即止",
+    "city": "西安",
+    "roles": [
+      "机器人运控/Java后端/研发实习"
+    ],
+    "url": "http://job.xjtu.edu.cn/frontpage/xjtu/html/recruitmentinfoForm.html?positionDetailId=61099ada87f349afbab5bd1985f90cd1",
+    "rule": "高校就业页投递/按公告联系",
+    "reason": "具身智能初创的机器人软件和物联网方向，本科计算机可投",
+    "deadline": null,
+    "evidenceUrl": "http://job.xjtu.edu.cn/frontpage/xjtu/html/recruitmentinfoForm.html?positionDetailId=61099ada87f349afbab5bd1985f90cd1",
+    "education": "本科可投",
+    "sourceNotes": "部分岗位偏工程开发，产品岗位不明确"
+  },
+  {
+    "id": "new-676983701e5b",
+    "name": "中国电子云",
+    "type": "云与ICT",
+    "priority": "P0",
+    "score": 97,
+    "open": "招满即止",
+    "city": "北京/武汉/南京/杭州/成都",
+    "roles": [
+      "大模型数据工程/产品经理/Agent开发"
+    ],
+    "url": "https://campus.cestc.cn/#/page/2027%E6%A0%A1%E5%9B%AD%E6%8B%9B%E8%81%98",
+    "rule": "网上申请或现场投递二选一",
+    "reason": "专属AI云同时开放大模型数据、产品经理和Agent开发，和三条目标线都高度契合",
+    "deadline": null,
+    "evidenceUrl": "https://scc.cau.edu.cn/frontpage/cau/html/recruitmentinfoForm.html?positionDetailId=55bb4af931934f07ac2ffb26a9bacdf4",
+    "education": "本科可投",
+    "sourceNotes": "央企核心企业，优先投产品经理或大模型数据工程"
+  },
+  {
+    "id": "new-98f8f5710d36",
+    "name": "中移互联网",
+    "type": "云与ICT",
+    "priority": "P0",
+    "score": 95,
+    "open": "deadline明确",
+    "city": "广州",
+    "roles": [
+      "AI产品经理/AI数据研发/AI智能体研发"
+    ],
+    "url": "https://job.10086.cn/personal/campus/campus_job_list.html?cId=87",
+    "rule": "中国移动招聘官网投递",
+    "reason": "官方岗位同时覆盖AI产品、智能体和数据研发，本科可投",
+    "deadline": "2026-10-08 23:59:59",
+    "evidenceUrl": "https://job.10086.cn/personal/campus/campus_job_list.html?cId=87",
+    "education": "本科可投",
+    "sourceNotes": "AI产品经理截止时间来自国聘岗位页；当天需立即投递"
+  },
+  {
+    "id": "new-d3c87740bf33",
+    "name": "中国电信福建公司",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 74,
+    "open": "deadline明确",
+    "city": "福州/福建各地",
+    "roles": [
+      "云网工程师/AI大数据IT需求分析"
+    ],
+    "url": "https://job.chinatelecom.com.cn/",
+    "rule": "官网投递，统一笔试",
+    "reason": "AI大数据、云计算和IT需求分析兼具，适合央企技术保底",
+    "deadline": "2027-03-28 22:00",
+    "evidenceUrl": "https://job.chinatelecom.com.cn/wt/TELE/web/index#/postinquiry?data=eyJrZXkiOjU4MTY0MCwidHlwZSI6MX0=",
+    "education": "本科可投",
+    "sourceNotes": "专业要求含计算机类、电子信息类、数学类等"
+  },
+  {
+    "id": "new-ab64d3d81e15",
+    "name": "英特尔中国",
+    "type": "云与ICT",
+    "priority": "P1",
+    "score": 80,
+    "open": "招满即止",
+    "city": "北京/上海/深圳",
+    "roles": [
+      "Agentic AI客户协同/Cloud and AI System/AI软件"
+    ],
+    "url": "https://chinacampus.jobs.intel.cn/",
+    "rule": "官网投递，部分岗位有笔试",
+    "reason": "Agentic AI与云AI系统方向前沿，但多数岗位偏工程技术",
+    "deadline": null,
+    "evidenceUrl": "http://m.toutiao.com/group/7676349455017050659/?upstream_biz=VolcEngine",
+    "education": "本科可投",
+    "sourceNotes": "第三方报道明确2026/2027届本科及以上；需在官网逐岗复核"
+  },
+  {
+    "id": "new-c0a554630fda",
+    "name": "海尔智家",
+    "type": "云与ICT",
+    "priority": "P0",
+    "score": 93,
+    "open": "招满即止",
+    "city": "青岛/全国",
+    "roles": [
+      "AI产品经理/IT产品经理/具身智能工程师"
+    ],
+    "url": "https://maker.haier.net/smart_home",
+    "rule": "海尔智家校招官网投递",
+    "reason": "明确开放AI产品经理、IT产品经理和VLA具身岗位，本科计算机匹配",
+    "deadline": null,
+    "evidenceUrl": "http://career.bit.edu.cn/frontpage/bit/html/recruitmentFairForm.html?id=46d850122eb440cd9f50f89210e838f4",
+    "education": "本科可投",
+    "sourceNotes": "国内2027届本科及以上"
+  },
+  {
+    "id": "new-5936c08727af",
+    "name": "海信集团",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 76,
+    "open": "招满即止",
+    "city": "青岛/深圳/北京/上海/武汉等",
+    "roles": [
+      "研发技术/数字化/产品相关岗位"
+    ],
+    "url": "https://jobs.hisense.com/",
+    "rule": "只能投1个职位且不支持更改",
+    "reason": "智能家电、显示、汽车电子和AI场景，适合技术产品保底",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/recruitmentFairForm.html?id=c4b751f42a2a4bad85ae630925174251",
+    "education": "本科可投",
+    "sourceNotes": "务必慎选最匹配岗位"
+  },
+  {
+    "id": "new-5c7887464605",
+    "name": "中国联通",
+    "type": "云与ICT",
+    "priority": "P2",
+    "score": 78,
+    "open": "招满即止",
+    "city": "北京/全国",
+    "roles": [
+      "AI/数据/产品/云网技术岗位"
+    ],
+    "url": "https://zglt2027.zhaopin.com/",
+    "rule": "官方校招平台投递",
+    "reason": "运营商AI和云网场景，适合央企科技保底",
+    "deadline": null,
+    "evidenceUrl": "https://scc.cupl.edu.cn/frontpage/mobile/dist/index.html?nJpDWYFeFgaL=1791450435395#/recruitmentinfoList",
+    "education": "本科可投",
+    "sourceNotes": "北京分公司新苗计划10月8日仍在发布；逐岗核验"
+  },
+  {
+    "id": "new-c93e82ffd7d3",
+    "name": "中电鸿信（江苏电信数据和AI发展中心）",
+    "type": "云与ICT",
+    "priority": "P1",
+    "score": 86,
+    "open": "招满即止",
+    "city": "南京/江苏",
+    "roles": [
+      "数据与AI/产品解决方案相关岗位"
+    ],
+    "url": "https://job.chinatelecom.com.cn/",
+    "rule": "中国电信招聘官网按单位筛选",
+    "reason": "电信数据和AI发展中心，适合大模型数据和政企AI解决方案",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/index.html?eFIbrOKYRL6z=1790233267828",
+    "education": "本科可投",
+    "sourceNotes": "10月8日新发布，具体岗位及截止日期待官网确认"
+  },
+  {
+    "id": "new-bff0099b0b68",
+    "name": "招商银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 86,
+    "open": "deadline明确",
+    "city": "全国",
+    "roles": [
+      "信息技术/算法/测试/运维研发/数字金融"
+    ],
+    "url": "https://career.cmbchina.com/",
+    "rule": "最多投5个机构；同机构岗位数按公告",
+    "reason": "金融科技岗位体系完整，计算机本科可投，品牌与培养体系较强",
+    "deadline": "2026-10-10 23:59",
+    "evidenceUrl": "https://cmb-recruitment-mobile.paas.cmbchina.com/qa/school",
+    "education": "本科可投（部分数字金融岗要求硕士）",
+    "sourceNotes": "优先筛本科可投的信息技术岗，避开明确硕士岗"
+  },
+  {
+    "id": "new-959d56ee6796",
+    "name": "宁波银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 84,
+    "open": "deadline明确",
+    "city": "宁波/全国分行",
+    "roles": [
+      "总行金融科技定向生/消金金融科技定向生"
+    ],
+    "url": "https://zhaopin.nbcb.com.cn/app/",
+    "rule": "官网选择总行或子公司岗位",
+    "reason": "金融科技定向岗位明确且招聘量较大",
+    "deadline": "2026-10-31",
+    "evidenceUrl": "https://zhaopin.nbcb.com.cn/app/",
+    "education": "待确认",
+    "sourceNotes": "官方首页列岗位与截止日期；进入岗位详情核验本科门槛"
+  },
+  {
+    "id": "new-b9f4df3fbebf",
+    "name": "交通银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 85,
+    "open": "deadline明确",
+    "city": "上海/全国",
+    "roles": [
+      "软件开发/数据安全/IT系统管理/分行金融科技"
+    ],
+    "url": "https://job.bankcomm.com",
+    "rule": "总行2岗+分行2岗+子公司2岗，总计不超6岗",
+    "reason": "总行与分行均有金融科技职位，投递额度多",
+    "deadline": "2026-10-18",
+    "evidenceUrl": "https://scc.pku.edu.cn/frontpage/pku/html/recruitmentinfoForm.html?positionDetailId=22364d87059e4febb98d0ae4ae00b006",
+    "education": "待确认",
+    "sourceNotes": "毕业时间2026-01至2027-07；具体科技岗学历逐岗核验"
+  },
+  {
+    "id": "new-73a77781b5e4",
+    "name": "中国银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 84,
+    "open": "deadline明确",
+    "city": "全国",
+    "roles": [
+      "信息科技/运营科技支持"
+    ],
+    "url": "https://campus.chinahr.com/pages/2027-boc",
+    "rule": "最多申请5个岗位，部分重点分行可1-2岗",
+    "reason": "软件中心、信息科技运营中心及分行科技岗位覆盖面广",
+    "deadline": "2026-10-09 24:00",
+    "evidenceUrl": "http://job.bjfu.edu.cn/frontpage/mobile/dist/index.html#/recruitmentinfoForm?positionDetailId=3b30662f2caf4a4daf9053a3f3387bba&",
+    "education": "本科可投",
+    "sourceNotes": "截止临近，应先投直属科技机构和分行信息科技岗"
+  },
+  {
+    "id": "new-6d34bc7a0628",
+    "name": "中国民生银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 84,
+    "open": "deadline明确",
+    "city": "北京/深圳/全国",
+    "roles": [
+      "软件开发/金融科技/扬帆计划"
+    ],
+    "url": "https://career.cmbc.com.cn/",
+    "rule": "按总行、分行和附属机构公告投递",
+    "reason": "STEM+金融培养方向，计算机背景适配",
+    "deadline": "2026-10-25",
+    "evidenceUrl": "https://career.xujc.com/2026/0928/c3959a173096/page.htm",
+    "education": "本科可投",
+    "sourceNotes": "第三方高校汇总，须在官方招聘站复核岗位学历"
+  },
+  {
+    "id": "new-a898cfd9a672",
+    "name": "平安银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 82,
+    "open": "deadline明确",
+    "city": "深圳/上海/北京/全国",
+    "roles": [
+      "科技/数据/数字化产品相关岗位"
+    ],
+    "url": "https://campus.pingan.com/",
+    "rule": "官网按机构投递",
+    "reason": "金融科技与零售数字化场景丰富，本科可投岗位较多",
+    "deadline": "2026-11-06",
+    "evidenceUrl": "http://www.jsnxs.com/article/allbank/184602.html",
+    "education": "本科可投",
+    "sourceNotes": "截止日期来自银行秋招汇总，需以官网当日显示为准"
+  },
+  {
+    "id": "new-01667e877b24",
+    "name": "北京银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 87,
+    "open": "deadline明确",
+    "city": "北京/天津/上海/深圳/杭州等",
+    "roles": [
+      "科技英才（人工智能/软件开发/云计算）"
+    ],
+    "url": "https://bankofbeijing.zhiye.com",
+    "rule": "最多投3个岗位",
+    "reason": "科技英才明确覆盖AI与软件开发，本科及以上可投",
+    "deadline": "2026-10-15 24:00",
+    "evidenceUrl": "https://aeo.uibe.edu.cn/front/zph.jspa?tid=2104511146550693890",
+    "education": "本科可投",
+    "sourceNotes": "总行及部分分行招聘科技英才"
+  },
+  {
+    "id": "new-18c3fb317d10",
+    "name": "上海银行",
+    "type": "金融科技/银行科技",
+    "priority": "P2",
+    "score": 77,
+    "open": "deadline明确",
+    "city": "上海/深圳等",
+    "roles": [
+      "金融科技/信息技术相关岗位"
+    ],
+    "url": "https://bosc.zhiye.com/",
+    "rule": "官网选择总行或分行岗位",
+    "reason": "城商行数字化岗位，适合作为银行科技保底",
+    "deadline": "2026-11-22",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?city=440100%2C440300%2C440200&d_skill=80&domain=careercuhk",
+    "education": "本科可投",
+    "sourceNotes": "证据页明确深圳分行本科及以上；总行科技岗需另行核验"
+  },
+  {
+    "id": "new-1ea09d3677ee",
+    "name": "微众银行",
+    "type": "金融科技/银行科技",
+    "priority": "P0",
+    "score": 91,
+    "open": "deadline明确",
+    "city": "深圳",
+    "roles": [
+      "AI金融培训生/金融科技岗位"
+    ],
+    "url": "https://webank.zhiye.com/campus",
+    "rule": "官网投递",
+    "reason": "数字银行与AI金融培训生直接匹配AI+金融科技复合路线",
+    "deadline": "2026-11-30",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?domain=careercuhk&d_category=100&page=2",
+    "education": "本科可投",
+    "sourceNotes": "高校就业平台明确AI金融培训生、本科及以上"
+  },
+  {
+    "id": "new-c6f8babe699e",
+    "name": "汇丰科技中国",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 82,
+    "open": "deadline明确",
+    "city": "广州/上海/西安",
+    "roles": [
+      "软件工程/数据/技术产品相关岗位"
+    ],
+    "url": "https://www.hsbc.com.cn/careers/students-and-graduates/",
+    "rule": "官方学生招聘入口投递",
+    "reason": "国际化银行科技平台，适合计算机本科和英语能力较强者",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?city=440100%2C440300%2C440200&d_skill=80&domain=careercuhk",
+    "education": "本科可投",
+    "sourceNotes": "高校平台明确2027校园招聘、本科及以上"
+  },
+  {
+    "id": "new-559ddf29ff10",
+    "name": "平安金融壹账通",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 83,
+    "open": "招满即止",
+    "city": "深圳/上海",
+    "roles": [
+      "AI/数据/产品/金融科技相关岗位"
+    ],
+    "url": "https://oneconnectft.zhiye.com/campus",
+    "rule": "官方校招站投递",
+    "reason": "ToB金融科技与AI产品场景兼具",
+    "deadline": null,
+    "evidenceUrl": "https://gdjy.hfut.edu.cn/module/onlines?menu_id=40269",
+    "education": "待确认",
+    "sourceNotes": "10月1日仍列2027届校园招聘；具体职位、学历和截止时间需官网确认"
+  },
+  {
+    "id": "new-6cc73899f44f",
+    "name": "中信银行",
+    "type": "金融科技/银行科技",
+    "priority": "P1",
+    "score": 85,
+    "open": "deadline明确",
+    "city": "北京/成都/全国",
+    "roles": [
+      "金融科技/信息安全/软件开发"
+    ],
+    "url": "https://job.citicbank.com/",
+    "rule": "官网按机构和岗位投递",
+    "reason": "总行科技与软件中心适合计算机本科，金融AI场景清晰",
+    "deadline": "2026-10-09",
+    "evidenceUrl": "https://www.offcn.com/yinhang/2026/0904/74627.html",
+    "education": "本科可投",
+    "sourceNotes": "截止日期需以官网具体机构公告为准"
+  },
+  {
+    "id": "new-2d2c3284d460",
+    "name": "广发银行",
+    "type": "金融科技/银行科技",
+    "priority": "P2",
+    "score": 78,
+    "open": "deadline明确",
+    "city": "广州/佛山/北京/上海等",
+    "roles": [
+      "金融科技/研发中心岗位"
+    ],
+    "url": "https://chinalife.zhiye.com/cgb",
+    "rule": "官方招聘平台投递",
+    "reason": "研发中心与信用卡数字化业务适合计算机背景",
+    "deadline": "2026-11-15",
+    "evidenceUrl": "https://career.bnuzh.edu.cn/web/Index/jobs-brief-list?p=3&type=zpxx",
+    "education": "本科可投",
+    "sourceNotes": "就业站确认2027校招启动；截止日期需以官网为准"
+  },
+  {
+    "id": "new-bcc73ceb6b12",
+    "name": "国网信息通信产业集团",
+    "type": "央国企数字化",
+    "priority": "P0",
+    "score": 93,
+    "open": "招满即止",
+    "city": "北京/天津/成都/福州/合肥/雄安/西安等",
+    "roles": [
+      "产品经理/咨询顾问/人工智能/数字孪生"
+    ],
+    "url": "https://zhaopin.sgcc.com.cn/",
+    "rule": "国家电网统一招聘；留意天津大学10月19日宣讲",
+    "reason": "能源数字化、AI和产品经理均开放，天津也有岗位，地域与背景匹配",
+    "deadline": null,
+    "evidenceUrl": "https://zhaopin.sgcc.com.cn/sgcchr/static/unitPart.html?bullet_id=00ded2f14e9c4089bb0763b50aee3f48",
+    "education": "本科可投（在京单位通常硕士）",
+    "sourceNotes": "优先投天津、成都、福州等非京单位产品/项目岗位"
+  },
+  {
+    "id": "new-87bcd3bae8d8",
+    "name": "深智城集团",
+    "type": "央国企数字化",
+    "priority": "P1",
+    "score": 87,
+    "open": "deadline明确",
+    "city": "深圳",
+    "roles": [
+      "智慧城市/数字化产品/数据相关岗位"
+    ],
+    "url": "https://szci.zhiye.com/campus",
+    "rule": "官网校招投递",
+    "reason": "深圳市属数字化平台，适合智慧城市与ToG产品路线",
+    "deadline": "2026-11-27",
+    "evidenceUrl": "https://career.cuhk.edu.cn/job/search?city=440100%2C440300%2C440200&d_skill=80&domain=careercuhk",
+    "education": "待确认",
+    "sourceNotes": "高校平台显示学历不限；具体岗位仍需复核"
+  },
+  {
+    "id": "new-9a755885d3ff",
+    "name": "中国邮政集团",
+    "type": "央国企数字化",
+    "priority": "P2",
+    "score": 76,
+    "open": "deadline明确",
+    "city": "全国",
+    "roles": [
+      "信息技术/数据/产品运营相关岗位"
+    ],
+    "url": "https://chinapost2027.zhaopin.com/",
+    "rule": "官方校招平台按省公司/直属单位投递",
+    "reason": "大型央企数字化和智慧物流场景，适合保底",
+    "deadline": "2026-10-31",
+    "evidenceUrl": "https://jxdxsjy.jx.edu.cn/juwp/",
+    "education": "本科可投",
+    "sourceNotes": "优先搜索信息技术、数据分析、产品运营岗位"
+  },
+  {
+    "id": "new-48f5ffb879be",
+    "name": "中国大唐",
+    "type": "央国企数字化",
+    "priority": "P3",
+    "score": 68,
+    "open": "deadline明确",
+    "city": "北京/天津/广东/河北/福建/四川等",
+    "roles": [
+      "网络安全/技术研发/信息化运维"
+    ],
+    "url": "https://zhaopin.china-cdt.com/",
+    "rule": "官方招聘站投递",
+    "reason": "能源央企信息化岗位，可作为稳健保底",
+    "deadline": "2026-10-31",
+    "evidenceUrl": "http://m.toutiao.com/group/7691181422363394575/?upstream_biz=VolcEngine",
+    "education": "本科可投",
+    "sourceNotes": "第三方权威媒体汇总，需在官网确认具体单位岗位"
+  },
+  {
+    "id": "new-10030f5a1b81",
+    "name": "中国通号",
+    "type": "央国企数字化",
+    "priority": "P2",
+    "score": 73,
+    "open": "招满即止",
+    "city": "北京/全国",
+    "roles": [
+      "数字化/软件/信息通信岗位"
+    ],
+    "url": "https://crsc.zhiye.com/campus",
+    "rule": "集团官网或所属单位投递",
+    "reason": "轨交数字化与通信信息场景，计算机专业匹配",
+    "deadline": null,
+    "evidenceUrl": "https://job.bupt.edu.cn/frontpage/bupt/html/recruitmentFairForm.html?id=a895f391a8234195a35e87c10fbcbdcf",
+    "education": "本科可投（AI研发岗位可能硕士）",
+    "sourceNotes": "不要误投明确硕士的AI研发岗，筛选软件/信息化本科岗"
+  },
+  {
+    "id": "new-8980b2c383fd",
+    "name": "保利集团",
+    "type": "央国企数字化",
+    "priority": "P2",
+    "score": 75,
+    "open": "deadline明确",
+    "city": "全国",
+    "roles": [
+      "数字化/信息科技/AI相关岗位"
+    ],
+    "url": "https://poly.zhiye.com/campus",
+    "rule": "集团校招平台选择子公司",
+    "reason": "央企多业态数字化场景广，适合保底并关注科技子公司",
+    "deadline": "2026-12-31",
+    "evidenceUrl": "http://job.hitwh.edu.cn/zhxy-whxszyfzpt/zpxx?xxfl=1&ztlx=",
+    "education": "本科可投",
+    "sourceNotes": "优先筛保利发展、保利和润等数字化岗位"
+  },
+  {
+    "id": "new-c912e498d859",
+    "name": "中国移动",
+    "type": "央国企数字化",
+    "priority": "P1",
+    "score": 83,
+    "open": "招满即止",
+    "city": "全国",
+    "roles": [
+      "AI/数据/产品/云网技术"
+    ],
+    "url": "https://job.10086.cn/",
+    "rule": "中国移动统一招聘官网按公司投递",
+    "reason": "集团及专业公司岗位量大，本科计算机可投，适合作为央企科技主力池",
+    "deadline": null,
+    "evidenceUrl": "https://ocean.upc.edu.cn/2026/0820/c15079a498506/page.htm",
+    "education": "本科可投",
+    "sourceNotes": "优先筛中移互联网、研究院、省公司AI和产品岗位"
+  }
+];
 
     const statusOptions = ['未投递','准备中','已投递','笔试','一面','二面','HR面','OC','泡池','拒绝','放弃'];
     const storeKey = 'hugh-autumn-radar-v1';
@@ -302,7 +2440,18 @@
       "__knownIds": ["tencent","baidu","alibaba","bytedance","meituan","jd","huawei","deepseek","moonshot","zhipu","minimax","stepfun","01ai","baichuan","modelbest","sensetime","iflytek","xiaohongshu","zhihu","zuoyebang","didi","kuaishou","netease","xiaomi","oppo","vivo","lenovo","ant","taotian","pdd","bilibili","ctrip","intsig","infini","anker","transsion","zte","h3c","ctyun","mihoyo"],
       "__lastRefresh": "2026-08-16T21:58:00+08:00"
     };
-    let state = JSON.parse(localStorage.getItem(storeKey) || JSON.stringify(defaultState));
+    const companyDefaults = Object.fromEntries(companies.map(c => [c.id, {status:'未投递', interview:'未开始', note:'', updatedAt:'2026-10-08T18:02:00+08:00'}]));
+    const completeDefaultState = {...companyDefaults, ...defaultState, __knownIds:companies.map(c=>c.id), __lastRefresh:'2026-10-08T18:02:00+08:00'};
+    function loadMergedState() {
+      let savedState = {};
+      try { savedState = JSON.parse(localStorage.getItem(storeKey) || '{}') || {}; } catch (error) { console.warn('本地状态解析失败，使用默认状态', error); }
+      const merged = {...completeDefaultState, ...savedState};
+      companies.forEach(c => { merged[c.id] = {...completeDefaultState[c.id], ...(savedState[c.id] || {})}; });
+      merged.__knownIds = [...new Set([...(completeDefaultState.__knownIds || []), ...(savedState.__knownIds || [])])];
+      return merged;
+    }
+    let state = loadMergedState();
+    localStorage.setItem(storeKey, JSON.stringify(state));
     const $ = (id) => document.getElementById(id);
     const toast = (msg) => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800); };
     const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
@@ -310,7 +2459,9 @@
     const getNote = (id) => state[id]?.note || '';
     const getInterview = (id) => state[id]?.interview || '未开始';
     const badgeClass = (c) => c.priority.toLowerCase();
-    const openClass = (v) => v === '已开放' ? 'open' : v === '待确认' ? 'watch' : 'blocked';
+    const openClass = (v) => ['已开放','招满即止','deadline明确'].includes(v) ? 'open' : v === '待确认' ? 'watch' : 'blocked';
+    const parseDeadline = (value) => { if (!value) return null; const normalized = value.replace(/ 24:00(?::00)?$/, ' 23:59:59'); const d = new Date(normalized.includes('T') ? normalized : normalized.replace(' ', 'T') + (normalized.length === 10 ? 'T23:59:59'.slice(1) : '')); return Number.isNaN(d.getTime()) ? null : d; };
+    const deadlineInfo = (value) => { const d=parseDeadline(value); if(!d) return {kind:'none',days:Infinity,label:'未标截止'}; const now=new Date(); const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()); const target=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const days=Math.round((target-start)/86400000); return {kind:days<0?'past':days===0?'today':days<=7?'soon':'future',days,label:days===0?'今天截止':days<0?'已截止':days<=7?(days+'天后截止'):value.slice(0,10)}; };
 
     function render() {
       const q = $('q').value.trim().toLowerCase();
@@ -318,11 +2469,15 @@
       const tf = $('typeFilter').value;
       const of = $('openFilter').value;
       const sf = $('statusFilter').value;
+      const df = $('deadlineFilter').value;
+      const sortBy = $('sortBy').value;
       let list = companies.filter(c => {
-        const blob = [c.name,c.type,c.priority,c.open,c.city,c.roles.join(' '),c.rule,c.reason].join(' ').toLowerCase();
-        return (!q || blob.includes(q)) && (pf==='all'||c.priority===pf) && (tf==='all'||c.type===tf) && (of==='all'||c.open===of) && (sf==='all'||getStatus(c.id)===sf);
+        const blob = [c.name,c.type,c.priority,c.open,c.city,c.roles.join(' '),c.rule,c.reason,c.education,c.sourceNotes].join(' ').toLowerCase();
+        const di=deadlineInfo(c.deadline); const deadlineMatch=df==='all'||df===di.kind||(df==='7days'&&['today','soon'].includes(di.kind)); return (!q || blob.includes(q)) && (pf==='all'||c.priority===pf) && (tf==='all'||c.type===tf) && (of==='all'||c.open===of) && (sf==='all'||getStatus(c.id)===sf) && deadlineMatch;
       }).sort((a,b) => {
         const p = {P0:0,P1:1,P2:2,P3:3};
+        if(sortBy==='deadline') { const da=deadlineInfo(a.deadline), db=deadlineInfo(b.deadline); const rank=d=>d.kind==='past'?Number.MAX_SAFE_INTEGER-1:d.days; return rank(da)-rank(db) || p[a.priority]-p[b.priority]; }
+        if(sortBy==='score') return b.score-a.score || p[a.priority]-p[b.priority];
         return p[a.priority]-p[b.priority] || b.score-a.score;
       });
       $('cards').innerHTML = list.map(cardHtml).join('');
@@ -335,18 +2490,20 @@
       const status = getStatus(c.id);
       const interview = getInterview(c.id);
       const note = getNote(c.id);
+      const di = deadlineInfo(c.deadline);
+      const deadlineClass = `deadline-${di.kind}`;
       return `<article class="company" data-id="${c.id}">
         <div class="company-head">
-          <div class="company-title"><div class="avatar">${c.name.slice(0,1)}</div><div><h2>${c.name}</h2><div class="sub">${c.type} · ${c.city}</div><div class="badges"><span class="badge ${badgeClass(c)}">${c.priority}</span><span class="badge ${openClass(c.open)}">${c.open}</span><span class="badge">${status}</span></div></div></div>
+          <div class="company-title"><div class="avatar">${c.name.slice(0,1)}</div><div><h2>${c.name}</h2><div class="sub">${c.type} · ${c.city}</div><div class="badges"><span class="badge ${badgeClass(c)}">${c.priority}</span><span class="badge ${openClass(c.open)}">${escapeHtml(c.open)}</span><span class="badge ${deadlineClass}">${escapeHtml(di.label)}</span><span class="badge">${escapeHtml(status)}</span></div></div></div>
           <div class="fit"><b>${c.score}</b><span>匹配分</span></div>
         </div>
         <div class="company-body">
-          <div class="grid-2"><div class="mini"><small>优先岗位</small><div>${c.roles.slice(0,2).join(' / ')}</div></div><div class="mini"><small>必看规则</small><div>${c.rule}</div></div></div>
-          <p class="reason">${c.reason}</p>
-          <div class="job-list">${c.roles.map(r=>`<span class="job-chip">${r}</span>`).join('')}</div>
+          <div class="grid-2"><div class="mini"><small>优先岗位</small><div>${c.roles.slice(0,2).map(escapeHtml).join(' / ')}</div></div><div class="mini"><small>截止日期</small><div class="${deadlineClass}">${escapeHtml(c.deadline || '未标截止 · 招满即止请尽早')}</div></div><div class="mini"><small>必看规则</small><div>${escapeHtml(c.rule)}</div></div><div class="mini"><small>学历提示</small><div>${escapeHtml(c.education || '逐岗确认')}</div></div></div>
+          <p class="reason">${escapeHtml(c.reason)}</p>
+          <div class="job-list">${c.roles.map(r=>`<span class="job-chip">${escapeHtml(r)}</span>`).join('')}</div>
           <div class="ops"><select class="field status-select">${statusOptions.map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}</select><select class="field interview-select">${['未开始','待笔试','待一面','待二面','待HR','等结果','Offer沟通','结束'].map(s=>`<option ${s===interview?'selected':''}>${s}</option>`).join('')}</select></div>
           <textarea class="field note-input" placeholder="备注：投递账号、内推人、面试时间、JD关键词...">${escapeHtml(note)}</textarea>
-          <div class="link-row"><a class="open-link" href="${c.url}" target="_blank" rel="noopener">打开投递入口</a><button class="copy-link" data-url="${c.url}">复制链接</button></div>
+          <div class="link-row"><a class="open-link" href="${escapeHtml(c.url)}" target="_blank" rel="noopener">打开投递入口</a>${c.evidenceUrl?`<a class="evidence-link" href="${escapeHtml(c.evidenceUrl)}" target="_blank" rel="noopener">证据</a>`:''}<button class="copy-link" data-url="${escapeHtml(c.url)}">复制链接</button></div>
         </div>
       </article>`;
     }
@@ -365,14 +2522,15 @@
       const avg = Math.round(companies.reduce((s,c)=>s+c.score,0)/companies.length);
       $('avgScore').textContent = avg;
       $('statTotal').textContent = companies.length;
+      $('heroTotal').textContent = companies.length;
       $('statP0').textContent = companies.filter(c=>['P0','P1'].includes(c.priority)).length;
-      $('statOpen').textContent = companies.filter(c=>c.open==='已开放').length;
+      $('statOpen').textContent = companies.filter(c=>['已开放','招满即止','deadline明确'].includes(c.open)).length;
       $('statApplied').textContent = companies.filter(c=>!['未投递','放弃'].includes(getStatus(c.id))).length;
-      $('lastRefresh').textContent = '上次刷新：' + (state.__lastRefresh ? new Date(state.__lastRefresh).toLocaleString('zh-CN') : '未刷新');
+      $('lastRefresh').textContent = '数据刷新：2026-10-08';
     }
     function exportCsv() {
-      const rows = [['公司','类型','优先级','匹配分','开放状态','城市','优先岗位','投递状态','面试状态','备注','投递入口']];
-      companies.forEach(c => rows.push([c.name,c.type,c.priority,c.score,c.open,c.city,c.roles.join('/'),getStatus(c.id),getInterview(c.id),getNote(c.id),c.url]));
+      const rows = [['公司','类型','优先级','匹配分','开放状态','截止日期','城市','优先岗位','学历提示','投递状态','面试状态','备注','投递入口','证据链接']];
+      companies.forEach(c => rows.push([c.name,c.type,c.priority,c.score,c.open,c.deadline||'',c.city,c.roles.join('/'),c.education||'',getStatus(c.id),getInterview(c.id),getNote(c.id),c.url,c.evidenceUrl||'']));
       const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(',')).join('\n');
       const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '纪辉_秋招雷达_投递状态.csv'; a.click(); URL.revokeObjectURL(a.href);
@@ -385,10 +2543,10 @@
       save(); render();
       toast(fresh.length ? `发现 ${fresh.length} 家新增公司` : '已刷新：暂无新增公司，继续投，别磨叽');
     }
-    ['q','priorityFilter','typeFilter','openFilter','statusFilter'].forEach(id => $(id).addEventListener('input', render));
+    ['q','priorityFilter','typeFilter','openFilter','statusFilter','deadlineFilter','sortBy'].forEach(id => $(id).addEventListener('input', render));
     $('exportBtn').onclick = exportCsv;
     $('refreshBtn').onclick = refreshRadar;
-    $('resetBtn').onclick = () => { if(confirm('确定清空所有投递/面试状态和备注？')) { state = {}; save(); render(); toast('已清空'); } };
+    $('resetBtn').onclick = () => { if(confirm('确定清空所有投递/面试状态和备注？')) { state = {...structuredClone(companyDefaults), __knownIds:companies.map(c=>c.id), __lastRefresh:'2026-10-08T18:02:00+08:00'}; save(); render(); toast('已清空'); } };
     $('aboutBtn').onclick = () => $('modal').classList.add('show');
     $('closeModal').onclick = () => $('modal').classList.remove('show');
     $('modal').onclick = e => { if(e.target.id==='modal') $('modal').classList.remove('show'); };
